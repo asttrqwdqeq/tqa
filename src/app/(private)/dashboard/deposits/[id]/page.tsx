@@ -12,7 +12,6 @@ import {
   CheckCircle, 
   XCircle,
   User,
-  Wallet,
   Calendar,
   DollarSign,
   Hash,

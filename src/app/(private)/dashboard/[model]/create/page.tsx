@@ -92,7 +92,7 @@ export default function CreateModelPage({ params }: PageProps) {
           <CardHeader>
             <CardTitle className="text-red-600">Model not found</CardTitle>
             <CardDescription>
-              Model "{model}" does not exist or is not configured
+              {`Model "${model}" does not exist or is not configured`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -295,13 +295,13 @@ export default function CreateModelPage({ params }: PageProps) {
         <CardContent>
           <div className="space-y-3 text-sm text-muted-foreground">
             <p>
-              <strong>Creating record:</strong> After filling in all required fields, click "Create" to save the new record in the database.
+              <strong>Creating record:</strong> {`After filling in all required fields, click "Create" to save the new record in the database.`}
             </p>
             <p>
-              <strong>Validation:</strong> All fields are checked for correctness. Make sure the entered information meets the requirements.
+              <strong>Validation:</strong> {`All fields are checked for correctness. Make sure the entered information meets the requirements.`}
             </p>
             <p>
-              <strong>Cancel:</strong> You can cancel the creation of a record at any time by clicking the "Cancel" or "Back" button.
+              <strong>Cancel:</strong> {`You can cancel the creation of a record at any time by clicking the "Cancel" or "Back" button.`}
             </p>
           </div>
         </CardContent>

@@ -430,7 +430,7 @@ export default function ModelPage({ params }: PageProps) {
           <CardHeader>
             <CardTitle className="text-red-600">Модель не найдена</CardTitle>
             <CardDescription>
-              Модель "{model}" не существует или не настроена
+              {`Модель "${model}" не существует или не настроена`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -555,7 +555,7 @@ export default function ModelPage({ params }: PageProps) {
             <div>
               <CardTitle>Список {modelConfig.title.toLowerCase()}</CardTitle>
               <CardDescription>
-                Управление данными модели "{model}"
+                {`Управление данными модели "${model}"`}
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">

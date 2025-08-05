@@ -54,7 +54,7 @@ export default function WithdrawDetailPage() {
       })
       toast.success("Вывод подтвержден")
       setTxHashInput('')
-    } catch (error) {
+    } catch {
       toast.error("Ошибка при подтверждении вывода")
     }
   }
@@ -67,7 +67,7 @@ export default function WithdrawDetailPage() {
       })
       toast.success("Вывод отклонен, средства возвращены пользователю")
       setRejectionReason('')
-    } catch (error) {
+    } catch {
       toast.error("Ошибка при отклонении вывода")
     }
   }

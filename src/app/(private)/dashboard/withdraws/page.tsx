@@ -26,7 +26,8 @@ import {
   MoreVertical,
   Calendar,
   Check,
-  X
+  X,
+  LucideIcon
 } from "lucide-react"
 import { 
   useWithdraws, 
@@ -89,7 +90,7 @@ export default function WithdrawsPage() {
     try {
       await approveWithdraw.mutateAsync({ id, txHash })
       toast.success("Вывод подтвержден")
-    } catch (error) {
+    } catch {
       toast.error("Ошибка при подтверждении вывода")
     }
   }
@@ -98,7 +99,7 @@ export default function WithdrawsPage() {
     try {
       await rejectWithdraw.mutateAsync({ id, reason })
       toast.success("Вывод отклонен, средства возвращены пользователю")
-    } catch (error) {
+    } catch {
       toast.error("Ошибка при отклонении вывода")
     }
   }
@@ -120,7 +121,7 @@ export default function WithdrawsPage() {
   }
 
   const getStatusBadge = (status: WithdrawEntity['status']) => {
-    const variants: Record<string, { variant: "outline", icon: any, className: string }> = {
+    const variants: Record<string, { variant: "outline", icon: LucideIcon, className: string }> = {
       PENDING: { variant: "outline" as const, icon: Clock, className: "text-yellow-600 border-yellow-200" },
       COMPLETED: { variant: "outline" as const, icon: CheckCircle, className: "text-green-600 border-green-200" },
       FAILED: { variant: "outline" as const, icon: XCircle, className: "text-red-600 border-red-200" }

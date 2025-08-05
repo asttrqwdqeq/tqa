@@ -197,13 +197,13 @@ export default function UpdateModelPage({ params }: PageProps) {
   const modelConfig = modelConfigs[model]
   
   // Используем универсальные хуки
-  const { data: apiData, isLoading, error } = useModelItem(model, id || '', {
+  const { data: apiData, isLoading   } = useModelItem(model, id || '', {
     enabled: !!id
   })
   const updateMutation = useUpdateMutation(model, router)
   const deleteMutation = useDeleteMutation(model, router)
   
-  const { register, handleSubmit, formState: { errors, isSubmitting }, reset } = useForm()
+  const { register, handleSubmit, formState: { isSubmitting }, reset } = useForm()
   
   // Заполняем форму данными при загрузке
   useEffect(() => {
@@ -222,7 +222,7 @@ export default function UpdateModelPage({ params }: PageProps) {
           <CardHeader>
             <CardTitle className="text-red-600">Модель не найдена</CardTitle>
             <CardDescription>
-              Модель "{model}" не существует или не настроена
+              {`Модель "${model}" не существует или не настроена`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -262,7 +262,7 @@ export default function UpdateModelPage({ params }: PageProps) {
           <CardHeader>
             <CardTitle className="text-red-600">Запись не найдена</CardTitle>
             <CardDescription>
-              Запись с ID "{id}" не существует
+              {`Запись с ID "${id}" не существует`}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -361,8 +361,8 @@ export default function UpdateModelPage({ params }: PageProps) {
       {/* Информация о записи */}
       <Alert>
         <AlertDescription>
-          Вы редактируете запись "{model}" с ID "{id}". 
-          Изменения будут сохранены только после нажатия кнопки "Сохранить".
+          {`Вы редактируете запись "${model}" с ID "${id}".`}
+          {`Изменения будут сохранены только после нажатия кнопки "Сохранить".`}
         </AlertDescription>
       </Alert>
 
@@ -371,15 +371,13 @@ export default function UpdateModelPage({ params }: PageProps) {
         <CardHeader>
           <CardTitle>Основная информация</CardTitle>
           <CardDescription>
-            Измените необходимые поля и нажмите "Сохранить" для применения изменений
+            {`Измените необходимые поля и нажмите "Сохранить" для применения изменений`}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
               {modelConfig.fields.map((field) => {
-                const value = data[field.key as keyof typeof data]
-                
                 return (
                   <div key={field.key} className="space-y-2">
                     <Label htmlFor={field.key}>

@@ -9,7 +9,6 @@ import { Badge } from "@/shared/components/ui/badge"
 import { toast } from "sonner"
 import { Save, RotateCcw, Download, Upload, Settings, RefreshCw } from "lucide-react"
 import { useState, useEffect } from "react"
-import { useAuth } from "@/entities/auth"
 import { 
   useAppSettingsManager,
   formatSettingValue,
@@ -29,11 +28,9 @@ import {
 } from "@/features/app-settings"
 
 export default function AppSettingsPage() {
-  const { user } = useAuth()
   
   const { 
     settings, 
-    schema, 
     isLoading, 
     isError, 
     error, 

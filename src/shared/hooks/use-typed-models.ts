@@ -133,9 +133,11 @@ export interface UpdateOrderData {
 }
 
 // Settings модель
+type SettingsValue = string | number | boolean | Record<string, unknown> | unknown[]
+
 export interface SettingsEntity extends BaseEntity {
   key: string
-  value: any
+  value: SettingsValue
   type: 'string' | 'number' | 'boolean' | 'json'
   description?: string
   category?: string
@@ -144,7 +146,7 @@ export interface SettingsEntity extends BaseEntity {
 
 export interface CreateSettingsData {
   key: string
-  value: any
+  value: SettingsValue
   type: 'string' | 'number' | 'boolean' | 'json'
   description?: string
   category?: string
@@ -152,7 +154,7 @@ export interface CreateSettingsData {
 }
 
 export interface UpdateSettingsData {
-  value?: any
+  value?: SettingsValue
   description?: string
   category?: string
   isPublic?: boolean
@@ -199,21 +201,21 @@ export function useNotification(id: string) {
 
 export function useCreateNotification(options?: {
   onSuccess?: (data: NotificationEntity) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useCreateModel<NotificationEntity, CreateNotificationData>('notifications', options)
 }
 
 export function useUpdateNotification(options?: {
   onSuccess?: (data: NotificationEntity) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useUpdateModel<NotificationEntity, UpdateNotificationData>('notifications', options)
 }
 
 export function useDeleteNotification(options?: {
   onSuccess?: (id: string) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useDeleteModel('notifications', options)
 }
@@ -243,21 +245,21 @@ export function useUser(id: string) {
 
 export function useCreateUser(options?: {
   onSuccess?: (data: UserEntity) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useCreateModel<UserEntity, CreateUserData>('users', options)
 }
 
 export function useUpdateUser(options?: {
   onSuccess?: (data: UserEntity) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useUpdateModel<UserEntity, UpdateUserData>('users', options)
 }
 
 export function useDeleteUser(options?: {
   onSuccess?: (id: string) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useDeleteModel('users', options)
 }
@@ -287,21 +289,21 @@ export function useOrder(id: string) {
 
 export function useCreateOrder(options?: {
   onSuccess?: (data: OrderEntity) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useCreateModel<OrderEntity, CreateOrderData>('orders', options)
 }
 
 export function useUpdateOrder(options?: {
   onSuccess?: (data: OrderEntity) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useUpdateModel<OrderEntity, UpdateOrderData>('orders', options)
 }
 
 export function useDeleteOrder(options?: {
   onSuccess?: (id: string) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useDeleteModel('orders', options)
 }
@@ -331,21 +333,21 @@ export function useSetting(id: string) {
 
 export function useCreateSetting(options?: {
   onSuccess?: (data: SettingsEntity) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useCreateModel<SettingsEntity, CreateSettingsData>('settings', options)
 }
 
 export function useUpdateSetting(options?: {
   onSuccess?: (data: SettingsEntity) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useUpdateModel<SettingsEntity, UpdateSettingsData>('settings', options)
 }
 
 export function useDeleteSetting(options?: {
   onSuccess?: (id: string) => void
-  onError?: (error: any) => void
+  onError?: (error: unknown) => void
 }) {
   return useDeleteModel('settings', options)
 }
@@ -418,9 +420,9 @@ export function useSettingByKey(key: string) {
  */
 export function useUpdateSettingByKey() {
   const updateMutation = useUpdateSetting()
-  
+
   return {
-    updateByKey: (key: string, value: any) => {
+    updateByKey: (key: string, value: SettingsValue) => {
       // В реальном приложении здесь будет поиск ID по ключу
       // Пока используем key как ID для примера
       return updateMutation.mutate({ id: key, data: { value } })

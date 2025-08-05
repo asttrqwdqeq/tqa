@@ -7,19 +7,14 @@ import React from 'react'
 import { 
   // Универсальные хуки
   useModelList,
-  useModelItem,
   useCreateModel,
-  useUpdateModel,
   useDeleteModel,
   useModelPagination,
   usePrefetchModel,
   
   // Типизированные хуки
   useNotifications,
-  useNotification,
   useCreateNotification,
-  useUpdateNotification,
-  useDeleteNotification,
   useToggleNotificationAlert,
   
   useUsers,
@@ -30,10 +25,7 @@ import {
   useToggleUserStatus,
   
   useOrders,
-  useOrder,
   useCreateOrder,
-  useUpdateOrder,
-  useDeleteOrder,
   useUpdateOrderStatus,
   
   // Типы
@@ -50,7 +42,7 @@ import {
 // =============================================================================
 
 export function UniversalModelExample() {
-  const { page, pageSize, paginationConfig, params } = useModelPagination(1, 10)
+  const { page, paginationConfig, params } = useModelPagination(1, 10)
   
   // Универсальный хук - может работать с любой моделью
   const { data: notifications, isLoading: notificationsLoading } = useModelList(
@@ -155,7 +147,7 @@ export function TypedModelExample() {
     onSuccess: (notification) => {
       console.log('Создано уведомление:', notification.title)
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('Ошибка создания:', error.message)
     }
   })
