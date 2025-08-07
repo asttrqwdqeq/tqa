@@ -1,9 +1,11 @@
 "use client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card";
 import { useAuth } from "@/entities/auth";
+import { useRouter } from "next/navigation";
 
 export default function DashboardPage() {
   const { user, isLoading } = useAuth();
+  const router = useRouter();
 
   if (isLoading) {
     return (
@@ -102,7 +104,7 @@ export default function DashboardPage() {
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {/* Уведомления */}
             <div 
-              onClick={() => window.location.href = '/dashboard/notifications'}
+              onClick={() => router.push('/dashboard/notifications')}
               className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -116,7 +118,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = '/dashboard/notifications'
+                    router.push('/dashboard/notifications')
                   }}
                   className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
                 >
@@ -125,7 +127,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = '/dashboard/notifications/create'
+                    router.push('/dashboard/notifications/create')
                   }}
                   className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded"
                 >
@@ -135,8 +137,8 @@ export default function DashboardPage() {
             </div>
 
             {/* Пользователи */}
-            {/* <div 
-              onClick={() => window.location.href = '/dashboard/users'}
+            <div 
+              onClick={() => router.push('/dashboard/users')}
               className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -150,7 +152,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = '/dashboard/users'
+                    router.push('/dashboard/users')
                   }}
                   className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
                 >
@@ -159,18 +161,18 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = '/dashboard/users/create'
+                    router.push('/dashboard/users/create')
                   }}
                   className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded"
                 >
                   Create
                 </button>
               </div>
-            </div> */}
+            </div>
 
             {/* App Wallet */}
             <div 
-              onClick={() => window.location.href = '/dashboard/appWallet'}
+              onClick={() => router.push('/dashboard/appWallet')}
               className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -184,7 +186,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = '/dashboard/appWallet'
+                    router.push('/dashboard/appWallet')
                   }}
                   className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
                 >
@@ -193,7 +195,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = '/dashboard/appWallet/create'
+                    router.push('/dashboard/appWallet/create')
                   }}
                   className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded"
                 >
@@ -204,7 +206,7 @@ export default function DashboardPage() {
 
             {/* Депозиты и операции */}
             <div 
-              onClick={() => window.location.href = '/dashboard/deposits'}
+              onClick={() => router.push('/dashboard/deposits')}
               className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -218,7 +220,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = '/dashboard/deposits'
+                    router.push('/dashboard/deposits')
                   }}
                   className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
                 >
@@ -227,7 +229,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = '/dashboard/deposits?status=PENDING'
+                    router.push('/dashboard/deposits?status=PENDING')
                   }}
                   className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded"
                 >

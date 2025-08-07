@@ -8,12 +8,9 @@ import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { Badge } from "@/shared/components/ui/badge"
 import { 
-  UniversalTable, 
   AdvancedUniversalTable,
-  useServerPagination,
   columnHelpers,
   commonColumns,
-  type TableConfig,
   type AdvancedTableConfig 
 } from "@/shared/components/data-table"
 
@@ -84,87 +81,13 @@ function useModelData(model: string) {
   
   // Используем универсальный хук
   const { data: apiData, isLoading, error } = useModelList(model, params, {
-    enabled: ['notifications', 'appWallet'].includes(model), // Включаем реальный API для notifications и appWallet
+    enabled: ['notifications', 'appWallet', 'users'].includes(model), // Включаем реальный API для notifications и appWallet
     staleTime: 1000 * 60 * 2, // 2 минуты кэширование
   })
   
-  // Fallback на мок-данные если API недоступен
-  const generateMockData = () => {
-    switch (model) {
-      case "notifications":
-        return {
-          data: Array.from({ length: pageSize || 10 }, (_, i) => ({
-            id: `notif-${page || 1}-${i}`,
-            title: `Уведомление ${((page || 1) - 1) * (pageSize || 10) + i + 1}`,
-            message: `Содержание уведомления номер ${((page || 1) - 1) * (pageSize || 10) + i + 1}. Это важная информация для пользователей системы.`,
-            isAlert: Math.random() > 0.5,
-            createdAt: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-            updatedAt: new Date().toISOString()
-          })) as NotificationEntity[],
-          total: 127,
-          isLoading: false
-        }
-        
-      case "users":
-        return {
-          data: Array.from({ length: pageSize || 10 }, (_, i) => ({
-            id: `user-${page || 1}-${i}`,
-            name: `Пользователь ${((page || 1) - 1) * (pageSize || 10) + i + 1}`,
-            email: `user${((page || 1) - 1) * (pageSize || 10) + i + 1}@example.com`,
-            role: ["admin", "user", "moderator"][Math.floor(Math.random() * 3)] as any,
-            isActive: Math.random() > 0.2,
-            lastLogin: Math.random() > 0.3 ? new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString() : undefined,
-            createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-            updatedAt: new Date().toISOString()
-          })) as UserEntity[],
-          total: 89,
-          isLoading: false
-        }
-        
-      case "orders":
-        return {
-          data: Array.from({ length: pageSize || 10 }, (_, i) => ({
-            id: `order-${page || 1}-${i}`,
-            orderNumber: `ORD-${String(((page || 1) - 1) * (pageSize || 10) + i + 1).padStart(6, '0')}`,
-            customerName: `Клиент ${((page || 1) - 1) * (pageSize || 10) + i + 1}`,
-            total: Math.floor(Math.random() * 50000) + 1000,
-            status: ["pending", "paid", "shipped", "delivered", "cancelled"][Math.floor(Math.random() * 5)] as any,
-            createdAt: new Date(Date.now() - Math.random() * 14 * 24 * 60 * 60 * 1000).toISOString(),
-            updatedAt: new Date().toISOString()
-          })) as OrderEntity[],
-          total: 234,
-          isLoading: false
-        }
-        
-              case "appWallet":
-          return {
-            data: Array.from({ length: pageSize || 10 }, (_, i) => ({
-              id: `wallet-${String(((page || 1) - 1) * (pageSize || 10) + i + 1).padStart(6, '0')}`,
-              createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-              updatedAt: new Date().toISOString(),
-              userCount: Math.floor(Math.random() * 50)
-            })) as AppWalletEntity[],
-            total: 45,
-            isLoading: false
-          }
-        
-      default:
-        return {
-          data: [],
-          total: 0,
-          isLoading: false,
-          page: 1,
-          pageSize: 10
-        }
-    }
-  }
-
-  // Возвращаем реальные данные или мок-данные при ошибке
   if (error) {
     console.warn(`API ошибка для модели ${model}:`, error)
-    const mockData = generateMockData()
     return { 
-      ...mockData, 
       isLoading: false, 
       error: null,
       page: page || 1,
@@ -173,6 +96,7 @@ function useModelData(model: string) {
   }
   
   if (apiData) {
+    console.log(`📊 Data for ${model}:`, apiData) // Debug logging
     return {
       data: apiData.data || [],
       total: apiData.total || 0,
@@ -183,9 +107,7 @@ function useModelData(model: string) {
     }
   }
   
-  const mockData = generateMockData()
   return { 
-    ...mockData, 
     isLoading, 
     error: null, 
     page: page || 1, 
@@ -199,22 +121,21 @@ function getTableConfig(
   router: any,
   deleteMutation: any,
   prefetchItem: any
-): AdvancedTableConfig<any> {
+): AdvancedTableConfig<any> { 
   const baseActions = [
     {
-      label: "Просмотр",
+      label: "View",
       icon: <Settings className="h-4 w-4" />,
       onClick: (row: any) => {
         router.push(`/dashboard/${model}/update?id=${row.id}`)
       },
       variant: "outline" as const,
       onHover: (row: any) => {
-        // Предзагружаем данные при наведении
         prefetchItem(model, row.id)
       }
     },
     {
-      label: "Редактировать", 
+      label: "Edit", 
       icon: <Settings className="h-4 w-4" />,
       onClick: (row: any) => {
         router.push(`/dashboard/${model}/update?id=${row.id}`)
@@ -225,19 +146,19 @@ function getTableConfig(
       }
     },
     {
-      label: "Удалить",
+      label: "Delete",
       icon: <Settings className="h-4 w-4" />,
       onClick: (row: any) => {
-        if (confirm(`Удалить ${model}?`)) {
+        if (confirm(`Delete ${model}?`)) {
           deleteMutation.mutate(row.id, {
             onSuccess: () => {
-              console.log(`Успешно удален ${model}:`, row.id)
+              console.log(`Successfully deleted ${model}:`, row.id)
             },
             onError: (error: any) => {
-              console.error(`Ошибка удаления ${model}:`, error)
+              console.error(`Error deleting ${model}:`, error)
             }
           })
-        }
+        } 
       },
       variant: "destructive" as const,
       disabled: (row: any) => deleteMutation.isPending
@@ -249,8 +170,8 @@ function getTableConfig(
       return {
         columns: [
           commonColumns.id({ width: 100 }),
-          columnHelpers.text("title", "Заголовок", { width: 250 }),
-          columnHelpers.text("message", "Сообщение", { 
+          columnHelpers.text("title", "Title", { width: 250 }),
+          columnHelpers.text("message", "Message", { 
             width: 300,
             render: (value) => (
               <div className="truncate max-w-xs" title={value}>
@@ -258,27 +179,27 @@ function getTableConfig(
               </div>
             )
           }),
-          columnHelpers.custom("isAlert", "Тип", (value, row: NotificationEntity) => (
+          columnHelpers.custom("isAlert", "Type", (value, row: NotificationEntity) => (
             <span className={`px-2 py-1 rounded-full text-xs font-medium ${
               row.isAlert 
                 ? 'bg-red-100 text-red-800' 
                 : 'bg-gray-100 text-gray-800'
             }`}>
-              {row.isAlert ? 'Важное' : 'Обычное'}
+              {row.isAlert ? 'Important' : 'Normal'}
             </span>
           ), { width: 120 }),
           commonColumns.createdAt({ width: 180 })
         ],
         searchKey: "title",
-        searchPlaceholder: "Поиск по заголовку...",
+        searchPlaceholder: "Search by title...",
         selectable: true,
         actions: [
           ...baseActions,
           {
-            label: "Переключить тип",
+            label: "Toggle type",
             onClick: (row: NotificationEntity) => {
-              console.log("Переключение типа:", row)
-              alert(`Уведомление ${row.isAlert ? 'сделано обычным' : 'сделано важным'}`)
+              console.log("Toggle type:", row)
+              alert(`Notification ${row.isAlert ? 'made normal' : 'made important'}`)
             },
             variant: "secondary" as const
           }
@@ -288,73 +209,76 @@ function getTableConfig(
     case "users":
       return {
         columns: [
-          commonColumns.id({ width: 100 }),
-          columnHelpers.text("name", "Имя", { width: 200 }),
-          columnHelpers.text("email", "Email", { width: 250 }),
-          columnHelpers.badge("role", "Роль", {
-            admin: "default",
-            user: "secondary",
-            moderator: "outline"
-          }, { width: 120 }),
-          commonColumns.isActive({ width: 100 }),
-          columnHelpers.date("lastLogin", "Последний вход", { 
-            width: 180,
-            render: (value) => value ? new Date(value).toLocaleString('ru-RU') : "Никогда"
+          columnHelpers.text("tgId", "Telegram ID", { 
+            width: 150,
+            render: (value: string) => (
+              <span className="font-mono text-sm px-2 py-1 rounded">
+                {value}
+              </span>
+            )
           }),
-          commonColumns.createdAt({ width: 180 })
+          columnHelpers.text("username", "Username", { 
+            width: 200,
+            render: (value: string | undefined, row: any) => (
+              <span className="font-medium">
+                {value || <span className="text-gray-400 italic">No username</span>}
+              </span>
+            )
+          }),
+          columnHelpers.custom("balance", "Balance", (value: number) => (
+            <span className={`font-semibold ${value > 0 ? 'text-green-600' : 'text-gray-500'}`}>
+              ${value?.toFixed(2) || '0.00'}
+            </span>
+          ), { width: 120 }),
+          columnHelpers.custom("vipLevel", "VIP Level", (value: any) => {
+            if (!value) return <span className="text-gray-400 text-sm">No VIP</span>
+            return (
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                Level {value.id}
+              </span>
+            )
+          }, { width: 120 }),
+          columnHelpers.custom("stats", "Referrals", (value: any, row: any) => (
+            <span className="font-medium text-blue-600">
+              {row.stats?.referralsCount || 0}
+            </span>
+          ), { width: 100 }),
+          columnHelpers.custom("stats", "Operations", (value: any, row: any) => (
+            <span className="font-medium text-orange-600">
+              {row.stats?.operationsCount || 0}
+            </span>
+          ), { width: 100 }),
+          columnHelpers.date("lastActivityAt", "Last Activity", { 
+            width: 150,
+            render: (value: string | undefined) => {
+              if (!value) return <span className="text-gray-400">Never</span>
+              const date = new Date(value)
+              const isRecent = Date.now() - date.getTime() < 7 * 24 * 60 * 60 * 1000 // 7 days
+              return (
+                <span className={isRecent ? 'text-green-600' : 'text-gray-500'}>
+                  {date.toLocaleDateString()}
+                </span>
+              )
+            }
+          }),
+          commonColumns.createdAt({ width: 150 })
         ],
-        searchKey: "name",
-        searchPlaceholder: "Поиск по имени...",
+        searchKey: "username",
+        searchPlaceholder: "Search by username or Telegram ID...",
         selectable: true,
         actions: [
           ...baseActions,
           {
-            label: "Заблокировать",
-            onClick: (row: UserEntity) => {
-              console.log("Блокировка:", row)
-              alert(`Пользователь ${row.isActive ? 'заблокирован' : 'разблокирован'}`)
-            },
-            variant: "destructive" as const,
-            show: (row: UserEntity) => row.role !== "admin"
-          }
-        ]
-      }
-
-    case "orders":
-      return {
-        columns: [
-          commonColumns.id({ width: 100 }),
-          columnHelpers.text("orderNumber", "№ заказа", { width: 150 }),
-          columnHelpers.text("customerName", "Клиент", { width: 200 }),
-          columnHelpers.number("total", "Сумма", {
-            format: (value) => `${value.toLocaleString('ru-RU')} ₽`,
-            align: "right",
-            width: 150
-          }),
-          columnHelpers.badge("status", "Статус", {
-            pending: "outline",
-            paid: "default",
-            shipped: "secondary", 
-            delivered: "default",
-            cancelled: "destructive"
-          }, { width: 120 }),
-          commonColumns.createdAt({ width: 180 })
-        ],
-        searchKey: "orderNumber",
-        searchPlaceholder: "Поиск по номеру заказа...",
-        selectable: true,
-        actions: [
-          ...baseActions,
-          {
-            label: "Отменить заказ",
-            onClick: (row: OrderEntity) => {
-              if (confirm("Отменить заказ?")) {
-                console.log("Отмена заказа:", row)
-                alert(`Заказ ${row.orderNumber} отменен`)
+            label: "Balance",
+            icon: <Settings className="h-4 w-4" />,
+            onClick: (row: any) => {
+              const newBalance = prompt(`Enter new balance for ${row.username || row.tgId}:`, row.balance?.toString() || '0')
+              if (newBalance && !isNaN(parseFloat(newBalance))) {
+                console.log('Update balance for user:', row.id, parseFloat(newBalance))
+                alert(`Balance will be updated to $${parseFloat(newBalance)}`)
               }
             },
-            variant: "destructive" as const,
-            show: (row: OrderEntity) => ["pending", "paid"].includes(row.status)
+            variant: "outline" as const
           }
         ]
       }
@@ -363,7 +287,7 @@ function getTableConfig(
       return {
         columns: [
           commonColumns.id({ width: 200 }),
-          columnHelpers.custom("userCount", "Пользователей", (value, row: AppWalletEntity) => (
+          columnHelpers.custom("userCount", "Users", (value, row: AppWalletEntity) => (
             <span className="text-sm font-medium">
               {row.userCount || 0}
             </span>
@@ -371,15 +295,15 @@ function getTableConfig(
           commonColumns.createdAt({ width: 180 })
         ],
         searchKey: "id",
-        searchPlaceholder: "Поиск по ID кошелька...",
+        searchPlaceholder: "Search by ID...",
         selectable: true,
         actions: [
           ...baseActions,
           {
-            label: "Статистика",
+            label: "Statistics",
             onClick: (row: AppWalletEntity) => {
-              console.log("Просмотр статистики:", row)
-              alert(`Статистика кошелька ${row.id}`)
+              console.log("View statistics:", row)
+              alert(`Statistics of wallet ${row.id}`)
             },
             variant: "secondary" as const
           }
@@ -390,7 +314,7 @@ function getTableConfig(
       return {
         columns: [
           commonColumns.id(),
-          columnHelpers.text("name", "Название"),
+          columnHelpers.text("name", "Name"),
           commonColumns.createdAt()
         ],
         searchKey: "name",
@@ -420,7 +344,7 @@ export default function ModelPage({ params }: PageProps) {
   // Добавляем серверную пагинацию к конфигурации таблицы
   const finalTableConfig: AdvancedTableConfig<any> = {
     ...tableConfig,
-    serverPagination: paginationConfig(total)
+    serverPagination: paginationConfig(total || 0)
   }
 
   if (!modelConfig) {
@@ -428,18 +352,18 @@ export default function ModelPage({ params }: PageProps) {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-red-600">Модель не найдена</CardTitle>
+            <CardTitle className="text-red-600">Model not found or not configured</CardTitle>
             <CardDescription>
-              {`Модель "${model}" не существует или не настроена`}
+              {`Model "${model}" not found or not configured`}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                Доступные модели: {Object.keys(modelConfigs).join(", ")}
+                Available models: {Object.keys(modelConfigs).join(", ")}
               </p>
               <Button onClick={() => router.push("/dashboard")} variant="outline">
-                Вернуться на главную
+                Return to main page
               </Button>
             </div>
           </CardContent>
@@ -472,14 +396,14 @@ export default function ModelPage({ params }: PageProps) {
           </Badge>
           <Button onClick={() => router.refresh()} variant="outline" size="sm">
             <RefreshCw className="h-4 w-4 mr-2" />
-            Обновить
+            Refresh
           </Button>
           <Button 
             size="sm"
             onClick={() => router.push(`/dashboard/${model}/create`)}
           >
             <Plus className="h-4 w-4 mr-2" />
-            Создать
+            Create
           </Button>
         </div>
       </div>
@@ -489,13 +413,13 @@ export default function ModelPage({ params }: PageProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Всего записей
+              Total records
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{(total || 0).toLocaleString('ru-RU')}</div>
             <p className="text-xs text-muted-foreground">
-              В базе данных
+              In database
             </p>
           </CardContent>
         </Card>
@@ -503,13 +427,13 @@ export default function ModelPage({ params }: PageProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              На текущей странице
+              On current page
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{data?.length || 0}</div>
             <p className="text-xs text-muted-foreground">
-              Страница {page || 1} из {Math.ceil((total || 0) / (pageSize || 10))}
+              Page {page || 1} of {Math.ceil((total || 0) / (pageSize || 10))}
             </p>
           </CardContent>
         </Card>
@@ -517,7 +441,7 @@ export default function ModelPage({ params }: PageProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              {model === 'notifications' ? 'Важных уведомлений' : 'Активных записей'}
+              {model === 'notifications' ? 'Important notifications' : 'Active records'}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -528,7 +452,7 @@ export default function ModelPage({ params }: PageProps) {
               }
             </div>
             <p className="text-xs text-muted-foreground">
-              {model === 'notifications' ? 'Важных уведомлений' : 'Активных элементов'}
+              {model === 'notifications' ? 'Important notifications' : 'Active elements'}
             </p>
           </CardContent>
         </Card>
@@ -536,11 +460,11 @@ export default function ModelPage({ params }: PageProps) {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">
-              Последнее обновление
+              Last update
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">Сейчас</div>
+            <div className="text-2xl font-bold">Now</div>
             <p className="text-xs text-muted-foreground">
               {new Date().toLocaleString('ru-RU')}
             </p>
@@ -553,15 +477,15 @@ export default function ModelPage({ params }: PageProps) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Список {modelConfig.title.toLowerCase()}</CardTitle>
+              <CardTitle>List of {modelConfig.title.toLowerCase()}</CardTitle>
               <CardDescription>
-                {`Управление данными модели "${model}"`}
+                {`Management of data model "${model}"`}
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="sm">
                 <Filter className="h-4 w-4 mr-2" />
-                Фильтры
+                Filters
               </Button>
             </div>
           </div>
@@ -578,54 +502,54 @@ export default function ModelPage({ params }: PageProps) {
       {/* Дополнительная информация */}
       <Card>
         <CardHeader>
-          <CardTitle>Информация о модели</CardTitle>
+          <CardTitle>Information about model</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <h4 className="text-sm font-medium mb-2">Параметры</h4>
+              <h4 className="text-sm font-medium mb-2">Parameters</h4>
               <dl className="space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Модель:</dt>
+                  <dt className="text-muted-foreground">Model:</dt>
                   <dd className="font-mono">{model}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Страница:</dt>
+                  <dt className="text-muted-foreground">Page:</dt>
                   <dd>{page}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Размер страницы:</dt>
+                  <dt className="text-muted-foreground">Page size:</dt>
                   <dd>{pageSize}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Всего страниц:</dt>
+                  <dt className="text-muted-foreground">Total pages:</dt>
                   <dd>{Math.ceil((total || 0) / (pageSize || 10))}</dd>
                 </div>
               </dl>
             </div>
             
             <div>
-              <h4 className="text-sm font-medium mb-2">Возможности</h4>
+              <h4 className="text-sm font-medium mb-2">Capabilities</h4>
               <div className="space-y-1 text-sm">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Поиск и фильтрация</span>
+                  <span>Search and filtering</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Сортировка по колонкам</span>
+                  <span>Sorting by columns</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Серверная пагинация</span>
+                  <span>Server pagination</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Выбор строк</span>
+                  <span>Row selection</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span>Контекстные действия</span>
+                  <span>Contextual actions</span>
                 </div>
               </div>
             </div>

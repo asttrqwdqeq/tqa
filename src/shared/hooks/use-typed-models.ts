@@ -40,12 +40,12 @@ export interface UpdateNotificationData {
 
 // User модель
 export interface UserEntity extends BaseEntity {
-  name: string
-  email: string
-  role: 'admin' | 'user' | 'moderator'
-  isActive: boolean
-  lastLogin?: string
-  avatar?: string
+  username: string
+  tgId: string
+  balance: number
+  vipLevelId: number
+  inviterId: string
+  appWalletId: string
 }
 
 // Deposit/Operation модель
@@ -79,60 +79,23 @@ export interface DepositSearchParams extends ModelSearchParams {
 }
 
 export interface CreateUserData {
-  name: string
-  email: string
-  password: string
-  role: 'admin' | 'user' | 'moderator'
-  isActive?: boolean
+  username: string
+  tgId: string
+  balance: number
+  vipLevelId: number
+  inviterId?: string
+  appWalletId: string
 }
 
 export interface UpdateUserData {
-  name?: string
-  email?: string
-  role?: 'admin' | 'user' | 'moderator'
-  isActive?: boolean
-  avatar?: string
+  username?: string
+  tgId?: string 
+  balance?: number
+  vipLevelId?: number
+  inviterId?: string
+  appWalletId?: string
 }
 
-// Order модель
-export interface OrderEntity extends BaseEntity {
-  orderNumber: string
-  customerName: string
-  customerEmail?: string
-  total: number
-  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
-  items?: OrderItem[]
-  notes?: string
-}
-
-export interface OrderItem {
-  id: string
-  name: string
-  quantity: number
-  price: number
-  total: number
-}
-
-export interface CreateOrderData {
-  orderNumber: string
-  customerName: string
-  customerEmail?: string
-  total: number
-  status: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
-  items?: Omit<OrderItem, 'id'>[]
-  notes?: string
-}
-
-export interface UpdateOrderData {
-  customerName?: string
-  customerEmail?: string
-  total?: number
-  status?: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
-  items?: OrderItem[]
-  notes?: string
-}
-
-// Settings модель
 type SettingsValue = string | number | boolean | Record<string, unknown> | unknown[]
 
 export interface SettingsEntity extends BaseEntity {
@@ -233,8 +196,6 @@ export function useBulkNotifications() {
 // ============================================================================
 
 export function useUsers(params?: ModelSearchParams & {
-  role?: 'admin' | 'user' | 'moderator'
-  isActive?: boolean
 }) {
   return useModelList<UserEntity>('users', params)
 }
@@ -270,50 +231,6 @@ export function useUserStats() {
 
 export function useBulkUsers() {
   return useBulkActions<UserEntity>('users')
-}
-
-// ============================================================================
-// ТИПИЗИРОВАННЫЕ ХУКИ ДЛЯ ORDERS
-// ============================================================================
-
-export function useOrders(params?: ModelSearchParams & {
-  status?: 'pending' | 'paid' | 'shipped' | 'delivered' | 'cancelled'
-  customerName?: string
-}) {
-  return useModelList<OrderEntity>('orders', params)
-}
-
-export function useOrder(id: string) {
-  return useModelItem<OrderEntity>('orders', id)
-}
-
-export function useCreateOrder(options?: {
-  onSuccess?: (data: OrderEntity) => void
-  onError?: (error: unknown) => void
-}) {
-  return useCreateModel<OrderEntity, CreateOrderData>('orders', options)
-}
-
-export function useUpdateOrder(options?: {
-  onSuccess?: (data: OrderEntity) => void
-  onError?: (error: unknown) => void
-}) {
-  return useUpdateModel<OrderEntity, UpdateOrderData>('orders', options)
-}
-
-export function useDeleteOrder(options?: {
-  onSuccess?: (id: string) => void
-  onError?: (error: unknown) => void
-}) {
-  return useDeleteModel('orders', options)
-}
-
-export function useOrderStats() {
-  return useModelStats<OrderStats>('orders')
-}
-
-export function useBulkOrders() {
-  return useBulkActions<OrderEntity>('orders')
 }
 
 // ============================================================================
@@ -375,35 +292,6 @@ export function useToggleNotificationAlert() {
   }
 }
 
-/**
- * Хук для блокировки/разблокировки пользователя
- */
-export function useToggleUserStatus() {
-  const updateMutation = useUpdateUser()
-  
-  return {
-    toggle: (id: string, isActive: boolean) => {
-      return updateMutation.mutate({ id, data: { isActive } })
-    },
-    isLoading: updateMutation.isPending,
-    error: updateMutation.error
-  }
-}
-
-/**
- * Хук для изменения статуса заказа
- */
-export function useUpdateOrderStatus() {
-  const updateMutation = useUpdateOrder()
-  
-  return {
-    updateStatus: (id: string, status: OrderEntity['status']) => {
-      return updateMutation.mutate({ id, data: { status } })
-    },
-    isLoading: updateMutation.isPending,
-    error: updateMutation.error
-  }
-}
 
 /**
  * Хук для получения настройки по ключу

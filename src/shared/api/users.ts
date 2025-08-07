@@ -1,40 +1,86 @@
 import { api } from './base';
-import { ApiResponse, PaginatedResponse, User, CreateUserData, UpdateUserData } from './types';
+import { 
+  User, 
+  UserListQuery, 
+  UpdateUserData, 
+  DeleteUserData,
+  UserListResponse,
+  UserResponse,
+  UserStatsResponse 
+} from './types';
 
 export const usersApi = {
   // Получить список пользователей
-  getUsers: async (params?: {
-    page?: number;
-    limit?: number;
-    search?: string;
-    role?: string;
-  }): Promise<PaginatedResponse<User>> => {
-    const response = await api.get<ApiResponse<PaginatedResponse<User>>>('/users', {
+  getUsers: async (params?: UserListQuery): Promise<UserListResponse> => {
+    const response = await api.get<UserListResponse>('/admin/users', {
       params,
     });
-    return response.data.data;
+    return response.data;
+  },
+
+  // Получить статистику пользователей
+  getUsersStats: async (params?: { period?: string }): Promise<UserStatsResponse> => {
+    const response = await api.get<UserStatsResponse>('/admin/users/stats', {
+      params,
+    });
+    return response.data;
   },
 
   // Получить пользователя по ID
-  getUser: async (id: string): Promise<User> => {
-    const response = await api.get<ApiResponse<User>>(`/users/${id}`);
-    return response.data.data;
-  },
-
-  // Создать пользователя
-  createUser: async (data: CreateUserData): Promise<User> => {
-    const response = await api.post<ApiResponse<User>>('/users', data);
-    return response.data.data;
+  getUser: async (id: string): Promise<UserResponse> => {
+    const response = await api.get<UserResponse>(`/admin/users/${id}`);
+    return response.data;
   },
 
   // Обновить пользователя
-  updateUser: async (id: string, data: UpdateUserData): Promise<User> => {
-    const response = await api.patch<ApiResponse<User>>(`/users/${id}`, data);
-    return response.data.data;
+  updateUser: async (id: string, data: UpdateUserData): Promise<UserResponse> => {
+    const response = await api.put<UserResponse>(`/admin/users/${id}`, data);
+    return response.data;
   },
 
-  // Удалить пользователя
-  deleteUser: async (id: string): Promise<void> => {
-    await api.delete(`/users/${id}`);
+  // Удалить пользователя (только для супер-админов)
+  deleteUser: async (id: string, options?: DeleteUserData): Promise<{ success: boolean; message: string }> => {
+    const response = await api.delete<{ success: boolean; message: string }>(`/admin/users/${id}`, {
+      data: options,
+    });
+    return response.data;
+  },
+
+  // Заблокировать/разблокировать пользователя
+  toggleUserBlock: async (id: string, blocked: boolean): Promise<UserResponse> => {
+    const response = await api.put<UserResponse>(`/admin/users/${id}/block`, {
+      blocked,
+    });
+    return response.data;
+  },
+
+  // Изменить баланс пользователя
+  updateUserBalance: async (id: string, balance: number, reason?: string): Promise<UserResponse> => {
+    const response = await api.put<UserResponse>(`/admin/users/${id}/balance`, {
+      balance,
+      reason,
+    });
+    return response.data;
+  },
+
+  // Изменить VIP уровень пользователя
+  updateUserVipLevel: async (id: string, vipLevelId: number, reason?: string): Promise<UserResponse> => {
+    const response = await api.put<UserResponse>(`/admin/users/${id}/vip`, {
+      vipLevelId,
+      reason,
+    });
+    return response.data;
+  },
+
+  // Получить операции пользователя
+  getUserOperations: async (id: string, params?: { limit?: number; offset?: number; type?: string; status?: string }) => {
+    const response = await api.get(`/admin/users/${id}/operations`, { params });
+    return response.data;
+  },
+
+  // Получить рефералов пользователя
+  getUserReferrals: async (id: string, params?: { limit?: number; offset?: number }) => {
+    const response = await api.get(`/admin/users/${id}/referrals`, { params });
+    return response.data;
   },
 };

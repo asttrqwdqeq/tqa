@@ -36,7 +36,7 @@ export interface ModelSearchParams {
 // Конфигурация эндпоинтов для разных моделей
 const modelEndpoints: Record<string, string> = {
   notifications: '/notifications', // Универсальные эндпоинты
-  users: '/users', 
+  users: '/admin/users', 
   orders: '/orders',
   settings: '/settings',
   admins: '/admins',
@@ -87,13 +87,26 @@ export function useModelList<T extends BaseEntity>(
       try {
         const endpoint = getModelEndpoint(model)
         
-        const response = await api.get<ApiResponse<PaginatedResponse<T>>>(endpoint, {
+        const response = await api.get<any>(endpoint, {
           params: {
             page: params?.page || 1,
             limit: params?.limit || 10,
             ...params
           }
         })
+        
+        console.log(`📊 API Response for ${model}:`, response.data) // Debug logging
+        
+        // Специальная обработка для users (новый формат ответа)
+        if (model === 'users' && response.data?.success) {
+          return {
+            data: response.data.data || [],
+            total: response.data.pagination?.total || 0,
+            page: response.data.pagination?.page || 1,
+            limit: response.data.pagination?.limit || 10,
+            totalPages: response.data.pagination?.totalPages || 0
+          } as PaginatedResponse<T>
+        }
         
         // Бэкенд возвращает данные напрямую в формате PaginatedResponse
         // Проверяем, что это объект с нужными полями
@@ -185,13 +198,13 @@ export function useCreateModel<T extends BaseEntity, TCreate = Partial<T>>(
       queryClient.invalidateQueries({ queryKey: modelKeys.stats(model) })
       
       if (options?.showToast !== false) {
-        toast.success(`${getModelDisplayName(model)} создан успешно`)
+        toast.success(`${getModelDisplayName(model)} created successfully`)
       }
       
       options?.onSuccess?.(data)
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || `Ошибка при создании ${getModelDisplayName(model).toLowerCase()}`
+      const message = error.response?.data?.message || `Error creating ${getModelDisplayName(model).toLowerCase()}`
       
       if (options?.showToast !== false) {
         toast.error(message)
@@ -225,26 +238,28 @@ export function useUpdateModel<T extends BaseEntity, TUpdate = Partial<T>>(
         return (response.data as ApiResponse<T>).data
       }
       
-      return response.data as T
+      return response.data as T 
     },
     onSuccess: (data, variables) => {
       // Обновляем кэш списков
       queryClient.invalidateQueries({ queryKey: modelKeys.lists(model) })
       
-      // Обновляем кэш деталей
-      queryClient.setQueryData(modelKeys.detail(model, variables.id), data)
+      // Инвалидируем кэш деталей чтобы данные загружались заново
+      queryClient.invalidateQueries({ queryKey: modelKeys.detail(model, variables.id) })
       
       // Инвалидируем статистику
       queryClient.invalidateQueries({ queryKey: modelKeys.stats(model) })
       
+      console.log(`✅ Cache invalidated for ${model} with id: ${variables.id}`)
+      
       if (options?.showToast !== false) {
-        toast.success(`${getModelDisplayName(model)} обновлен успешно`)
+        toast.success(`${getModelDisplayName(model)} updated successfully`)
       }
       
       options?.onSuccess?.(data)
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || `Ошибка при обновлении ${getModelDisplayName(model).toLowerCase()}`
+      const message = error.response?.data?.message || `Error updating ${getModelDisplayName(model).toLowerCase()}`
       
       if (options?.showToast !== false) {
         toast.error(message)
@@ -284,13 +299,13 @@ export function useDeleteModel(
       queryClient.invalidateQueries({ queryKey: modelKeys.stats(model) })
       
       if (options?.showToast !== false) {
-        toast.success(`${getModelDisplayName(model)} удален успешно`)
+        toast.success(`${getModelDisplayName(model)} deleted successfully`)
       }
       
       options?.onSuccess?.(deletedId)
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || `Ошибка при удалении ${getModelDisplayName(model).toLowerCase()}`
+      const message = error.response?.data?.message || `Error deleting ${getModelDisplayName(model).toLowerCase()}`
       
       if (options?.showToast !== false) {
         toast.error(message)
@@ -454,12 +469,12 @@ export function useModelPagination(initialPage = 1, initialPageSize = 10) {
 // Функция для получения отображаемого имени модели
 function getModelDisplayName(model: string): string {
   const displayNames: Record<string, string> = {
-    notifications: 'Уведомление',
-    users: 'Пользователь',
-    orders: 'Заказ',
-    settings: 'Настройка',
-    admins: 'Администратор',
-    products: 'Продукт',
+    notifications: 'Notification',
+    users: 'User',
+    orders: 'Order',
+    settings: 'Setting',
+    admins: 'Admin',
+    products: 'Product',
     appWallet: 'App Wallet',
   }
   

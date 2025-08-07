@@ -18,11 +18,10 @@ import {
   useDeleteModel,
   useUpdateNotification,
   useUpdateUser,
-  useUpdateOrder,
   useDeleteNotification,
   useDeleteUser,
-  useDeleteOrder
 } from "@/shared/hooks"
+import { useQueryClient } from "@tanstack/react-query"
 
 // Типы для полей формы
 interface FormField {
@@ -45,28 +44,26 @@ interface ModelConfig {
 // Конфигурации форм для разных моделей (те же что и в create)
 const modelConfigs: Record<string, ModelConfig> = {
   notifications: {
-    title: "Редактировать уведомление",
-    description: "Изменение существующего системного уведомления",
+    title: "Edit notification",
+    description: "Edit existing notification",
     icon: "📢",
     fields: [
-      { key: "title", label: "Заголовок", type: "text", required: true },
-      { key: "message", label: "Сообщение", type: "textarea", required: true },
-      { key: "isAlert", label: "Важное уведомление", type: "checkbox" }
+      { key: "title", label: "Title", type: "text", required: true },
+      { key: "message", label: "Message", type: "textarea", required: true },
+      { key: "isAlert", label: "Important notification", type: "checkbox" }
     ]
   },
   users: {
-    title: "Редактировать пользователя",
-    description: "Изменение данных существующего пользователя",
+    title: "Edit user",
+    description: "Edit existing user",
     icon: "👥",
     fields: [
-      { key: "name", label: "Имя", type: "text", required: true },
-      { key: "email", label: "Email", type: "email", required: true },
-      { key: "role", label: "Роль", type: "select", required: true, options: [
-        { value: "user", label: "Пользователь" },
-        { value: "moderator", label: "Модератор" },
-        { value: "admin", label: "Администратор" }
-      ]},
-      { key: "isActive", label: "Активен", type: "checkbox" }
+      { key: "username", label: "Username", type: "text", required: true },
+      { key: "tgId", label: "Telegram ID", type: "text", required: true },
+      { key: "balance", label: "Balance", type: "number", required: true },
+      { key: "vipLevelId", label: "VIP level", type: "number", required: true },
+      { key: "inviterId", label: "Inviter ID", type: "text", required: false },
+      { key: "appWalletId", label: "App Wallet ID", type: "text", required: true },
     ]
   },
   appWallet: {
@@ -79,70 +76,44 @@ const modelConfigs: Record<string, ModelConfig> = {
   }
 }
 
-// Мок-функция для получения данных записи
-function getMockData(model: string, id: string) {
-  switch (model) {
-    case "notifications":
-      return {
-        id,
-        title: `Уведомление ${id}`,
-        message: `Содержание уведомления с ID ${id}. Это важная информация для пользователей системы.`,
-        isAlert: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    case "users":
-      return {
-        id,
-        name: `Пользователь ${id}`,
-        email: `user${id}@example.com`,
-        role: "user",
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    case "orders":
-      return {
-        id,
-        orderNumber: `ORD-${id.padStart(6, '0')}`,
-        customerName: `Клиент ${id}`,
-        total: 15000,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    case "appWallet":
-      return {
-        id,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }
-    default:
-      return null
-  }
-}
-
 interface PageProps {
   params: Promise<{ model: string }>
 }
 
 // Хуки для получения правильных мутаций
-function useUpdateMutation(model: string, router: any) {
+function useUpdateMutation(model: string, router: any, currentId?: string) {
+  const queryClient = useQueryClient()
+  
+  const onSuccessWithCacheInvalidation = (data: any, variables?: any) => {
+    console.log(`🔄 Update success for ${model}:`, { data, variables })
+    
+    // Принудительно инвалидируем весь кэш для этой модели
+    queryClient.invalidateQueries({ queryKey: [model] })
+    
+    // Дополнительно инвалидируем конкретную запись (используем id из URL если variables нет)
+    const recordId = variables?.id || currentId
+    if (recordId) {
+      queryClient.removeQueries({ queryKey: [model, 'detail', recordId] })
+      console.log(`🗑️ Removed cache for ${model} detail:`, recordId)
+    }
+    
+    // Переходим на список
+    router.push(`/dashboard/${model}`)
+  }
+  
+  const onSuccessSimple = (data: any) => onSuccessWithCacheInvalidation(data)
+  
   const universalUpdate = useUpdateModel(model, {
-    onSuccess: () => router.push(`/dashboard/${model}`),
+    onSuccess: onSuccessWithCacheInvalidation,
     showToast: true
   })
   
   const notificationUpdate = useUpdateNotification({
-    onSuccess: () => router.push(`/dashboard/${model}`)
+    onSuccess: onSuccessSimple
   })
   
   const userUpdate = useUpdateUser({
-    onSuccess: () => router.push(`/dashboard/${model}`)
-  })
-  
-  const orderUpdate = useUpdateOrder({
-    onSuccess: () => router.push(`/dashboard/${model}`)
+    onSuccess: onSuccessSimple
   })
   
   switch (model) {
@@ -150,8 +121,6 @@ function useUpdateMutation(model: string, router: any) {
       return notificationUpdate
     case 'users':
       return userUpdate
-    case 'orders':
-      return orderUpdate
     default:
       return universalUpdate
   }
@@ -171,17 +140,11 @@ function useDeleteMutation(model: string, router: any) {
     onSuccess: () => router.push(`/dashboard/${model}`)
   })
   
-  const orderDelete = useDeleteOrder({
-    onSuccess: () => router.push(`/dashboard/${model}`)
-  })
-  
-  switch (model) {
+  switch (model) {  
     case 'notifications':
       return notificationDelete
     case 'users':
       return userDelete
-    case 'orders':
-      return orderDelete
     default:
       return universalDelete
   }
@@ -193,41 +156,73 @@ export default function UpdateModelPage({ params }: PageProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const id = searchParams.get('id')
+  const queryClient = useQueryClient()
   
   const modelConfig = modelConfigs[model]
   
-  // Используем универсальные хуки
-  const { data: apiData, isLoading   } = useModelItem(model, id || '', {
-    enabled: !!id
+  // Принудительно инвалидируем кэш при входе на страницу редактирования
+  useEffect(() => {
+    if (id && model) {
+      console.log(`🔄 Force invalidating cache for ${model}:${id}`)
+      queryClient.invalidateQueries({ queryKey: [model, 'detail', id] })
+    }
+  }, [id, model, queryClient])
+  
+  // Используем универсальные хуки с принудительным обновлением данных
+  const { data: apiData, isLoading } = useModelItem(model, id || '', {
+    enabled: !!id,
+    staleTime: 0, // Данные всегда считаются устаревшими - перезагружаем при каждом обновлении
   })
-  const updateMutation = useUpdateMutation(model, router)
+  const updateMutation = useUpdateMutation(model, router, id || undefined)
   const deleteMutation = useDeleteMutation(model, router)
   
   const { register, handleSubmit, formState: { isSubmitting }, reset } = useForm()
   
-  // Заполняем форму данными при загрузке
+  // Простая загрузка данных в форму при каждом обновлении
   useEffect(() => {
-    if (apiData) {
-      reset(apiData)
+    console.log('📊 Form effect triggered:', { 
+      hasApiData: !!apiData, 
+      hasModelConfig: !!modelConfig, 
+      isLoading,
+      id,
+      model 
+    })
+    
+    if (apiData && modelConfig && !isLoading) {
+      // Извлекаем только те поля, которые определены в конфигурации
+      const formData: any = {}
+      const dataRecord = apiData as any
+      
+      modelConfig.fields.forEach(field => {
+        if (dataRecord[field.key] !== undefined) {
+          formData[field.key] = dataRecord[field.key]
+        }
+      })
+      
+      console.log(`🔄 Loading form data for ${model}:${id}:`, formData)
+      console.log('📦 Raw API data:', apiData)
+      reset(formData)
+    } else {
+      console.log('⏳ Waiting for data...')
     }
-  }, [apiData, reset])
+  }, [apiData, modelConfig, isLoading, reset, id, model])
   
   // Fallback на мок-данные
-  const data = apiData || (id ? getMockData(model, id) : null)
+  const data = apiData
 
   if (!modelConfig) {
     return (
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-red-600">Модель не найдена</CardTitle>
+            <CardTitle className="text-red-600">Model not found</CardTitle>
             <CardDescription>
-              {`Модель "${model}" не существует или не настроена`}
+              {`Model "${model}" not found or not configured`}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={() => router.push("/dashboard")} variant="outline">
-              Вернуться на главную
+              Back to dashboard
             </Button>
           </CardContent>
         </Card>
@@ -240,15 +235,35 @@ export default function UpdateModelPage({ params }: PageProps) {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-red-600">ID не указан</CardTitle>
+            <CardTitle className="text-red-600">ID not specified</CardTitle>
             <CardDescription>
-              Для редактирования необходимо указать ID записи
+              For editing, you need to specify the record ID
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={() => router.push(`/dashboard/${model}`)} variant="outline">
-              К списку {model}
+              Back to {model} list
             </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Показываем индикатор загрузки
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Loading...</CardTitle>
+            <CardDescription>Loading record data...</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <span className="ml-2">Loading data...</span>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -260,36 +275,44 @@ export default function UpdateModelPage({ params }: PageProps) {
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-red-600">Запись не найдена</CardTitle>
+            <CardTitle className="text-red-600">Record not found</CardTitle>
             <CardDescription>
-              {`Запись с ID "${id}" не существует`}
+              {`Record with ID "${id}" not found`}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={() => router.push(`/dashboard/${model}`)} variant="outline">
-              К списку {model}
+              Back to {model} list
             </Button>
           </CardContent>
-        </Card>
+        </Card> 
       </div>
     )
   }
 
   const onSubmit = (formData: any) => {
-    if (!id) return
+    if (!id || !modelConfig) return
+    
+    // Извлекаем только те поля, которые определены в конфигурации
+    const filteredData: any = {}
+    modelConfig.fields.forEach(field => {
+      if (formData[field.key] !== undefined) {
+        filteredData[field.key] = formData[field.key]
+      }
+    })
     
     // Преобразуем данные в правильный формат
-    const transformedData = transformFormData(model, formData)
+    const transformedData = transformFormData(model, filteredData)
     
-    console.log("Обновление записи:", { id, ...transformedData })
+    console.log("📤 Updating record with filtered data:", { id, data: transformedData })
     updateMutation.mutate({ id, data: transformedData })
   }
 
   const handleDelete = () => {
     if (!id) return
     
-    if (confirm(`Вы уверены, что хотите удалить эту запись?`)) {
-      console.log("Удаление записи:", id)
+    if (confirm(`Are you sure you want to delete this record?`)) {
+      console.log("Deleting record:", id)
       deleteMutation.mutate(id)
     }
   }
@@ -307,11 +330,6 @@ export default function UpdateModelPage({ params }: PageProps) {
     
     // Специфичные преобразования для разных моделей
     switch (model) {
-      case 'orders':
-        return {
-          ...data,
-          total: parseFloat(data.total) || 0
-        }
       case 'appWallet':
         return {
           ...data,
@@ -334,7 +352,7 @@ export default function UpdateModelPage({ params }: PageProps) {
               onClick={() => router.push(`/dashboard/${model}`)}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Назад
+              Back
             </Button>
             <span className="text-2xl">{modelConfig.icon}</span>
             <div>
@@ -361,17 +379,17 @@ export default function UpdateModelPage({ params }: PageProps) {
       {/* Информация о записи */}
       <Alert>
         <AlertDescription>
-          {`Вы редактируете запись "${model}" с ID "${id}".`}
-          {`Изменения будут сохранены только после нажатия кнопки "Сохранить".`}
+          {`You are editing the record "${model}" with ID "${id}".`}
+          {`Changes will be saved only after clicking the "Save" button.`}
         </AlertDescription>
       </Alert>
 
       {/* Форма редактирования */}
       <Card>
         <CardHeader>
-          <CardTitle>Основная информация</CardTitle>
+          <CardTitle>Main information</CardTitle>
           <CardDescription>
-            {`Измените необходимые поля и нажмите "Сохранить" для применения изменений`}
+            {`Change the necessary fields and click "Save" to apply changes`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -383,14 +401,14 @@ export default function UpdateModelPage({ params }: PageProps) {
                     <Label htmlFor={field.key}>
                       {field.label}
                       {field.required && <span className="text-red-500 ml-1">*</span>}
-                      {field.readonly && <span className="text-muted-foreground ml-1">(только чтение)</span>}
+                      {field.readonly && <span className="text-muted-foreground ml-1">(readonly)</span>}
                     </Label>
                     
                     {(field.type === "text" || field.type === "email") && (
                       <Input
                         id={field.key}
                         type={field.type}
-                        placeholder={`Введите ${field.label.toLowerCase()}`}
+                        placeholder={`Enter ${field.label.toLowerCase()}`}
                         readOnly={field.readonly}
                         {...register(field.key, { required: field.required })}
                       />
@@ -400,7 +418,7 @@ export default function UpdateModelPage({ params }: PageProps) {
                       <Input
                         id={field.key}
                         type="number"
-                        placeholder={`Введите ${field.label.toLowerCase()}`}
+                        placeholder={`Enter ${field.label.toLowerCase()}`}
                         step="0.01"
                         readOnly={field.readonly}
                         {...register(field.key, { 
@@ -413,7 +431,7 @@ export default function UpdateModelPage({ params }: PageProps) {
                     {field.type === "textarea" && (
                       <textarea
                         id={field.key}
-                        placeholder={`Введите ${field.label.toLowerCase()}`}
+                        placeholder={`Enter ${field.label.toLowerCase()}`}
                         readOnly={field.readonly}
                         className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         {...register(field.key, { required: field.required })}
@@ -427,7 +445,7 @@ export default function UpdateModelPage({ params }: PageProps) {
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         {...register(field.key, { required: field.required })}
                       >
-                        <option value="">Выберите {field.label.toLowerCase()}</option>
+                        <option value="">Select {field.label.toLowerCase()}</option>
                         {field.options.map((option) => (
                           <option key={option.value} value={option.value}>
                             {option.label}
@@ -463,7 +481,7 @@ export default function UpdateModelPage({ params }: PageProps) {
                 disabled={updateMutation.isPending || isSubmitting || isLoading}
               >
                 <Save className="h-4 w-4 mr-2" />
-                {updateMutation.isPending ? 'Сохранение...' : 'Сохранить'}
+                {updateMutation.isPending ? 'Saving...' : 'Save'}
               </Button>
               
               <Button 
@@ -473,8 +491,10 @@ export default function UpdateModelPage({ params }: PageProps) {
                 disabled={updateMutation.isPending || deleteMutation.isPending}
               >
                 <X className="h-4 w-4 mr-2" />
-                Отмена
+                Cancel
               </Button>
+
+
               
               <Button 
                 type="button" 
@@ -484,7 +504,7 @@ export default function UpdateModelPage({ params }: PageProps) {
                 disabled={deleteMutation.isPending || updateMutation.isPending}
               >
                 <Trash2 className="h-4 w-4 mr-2" />
-                {deleteMutation.isPending ? 'Удаление...' : 'Удалить'}
+                {deleteMutation.isPending ? 'Deleting...' : 'Delete'}
               </Button>
             </div>
           </form>
@@ -494,28 +514,28 @@ export default function UpdateModelPage({ params }: PageProps) {
       {/* Метаданные записи */}
       <Card>
         <CardHeader>
-          <CardTitle>Метаданные</CardTitle>
+          <CardTitle>Metadata</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <h4 className="text-sm font-medium mb-2">Информация о записи</h4>
-              <dl className="space-y-1 text-sm">
+              <h4 className="text-sm font-medium mb-2">Record information</h4>
+              <dl className="space-y-1 text-sm">  
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">ID:</dt>
                   <dd className="font-mono">{data.id}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Создано:</dt>
+                  <dt className="text-muted-foreground">Created:</dt>
                   <dd>{new Date(data.createdAt).toLocaleString('ru-RU')}</dd>
                 </div>
                 <div className="flex justify-between">
-                  <dt className="text-muted-foreground">Обновлено:</dt>
-                  <dd>{data.updatedAt ? new Date(data.updatedAt).toLocaleString('ru-RU') : 'Не указано'}</dd>
+                  <dt className="text-muted-foreground">Updated:</dt>
+                  <dd>{data.updatedAt ? new Date(data.updatedAt).toLocaleString('ru-RU') : 'Not specified'}</dd>
                 </div>
                 {(data as any).createdBy && (
                   <div className="flex justify-between">
-                    <dt className="text-muted-foreground">Создал:</dt>
+                    <dt className="text-muted-foreground">Created by:</dt>
                     <dd>{(data as any).createdBy}</dd>
                   </div>
                 )}
@@ -523,25 +543,25 @@ export default function UpdateModelPage({ params }: PageProps) {
             </div>
             
             <div>
-              <h4 className="text-sm font-medium mb-2">Действия</h4>
+              <h4 className="text-sm font-medium mb-2">Actions</h4>
               <div className="space-y-2 text-sm">
                 <button 
                   onClick={() => navigator.clipboard.writeText(data.id)}
                   className="block w-full text-left px-3 py-2 rounded-md hover:bg-muted transition-colors"
                 >
-                  📋 Скопировать ID
+                  📋 Copy ID
                 </button>
                 <button 
                   onClick={() => window.print()}
                   className="block w-full text-left px-3 py-2 rounded-md hover:bg-muted transition-colors"
                 >
-                  🖨️ Печать
+                  🖨️ Print
                 </button>
                 <button 
-                  onClick={() => console.log("История изменений")}
+                  onClick={() => console.log("Change history")}
                   className="block w-full text-left px-3 py-2 rounded-md hover:bg-muted transition-colors"
                 >
-                  📜 История изменений
+                  📜 Change history
                 </button>
               </div>
             </div>

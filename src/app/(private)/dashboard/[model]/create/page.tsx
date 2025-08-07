@@ -33,28 +33,24 @@ interface ModelConfig {
 // Конфигурации форм для разных моделей
 const modelConfigs: Record<string, ModelConfig> = {
   notifications: {
-    title: "Создать уведомление",
-    description: "Создание нового системного уведомления",
+    title: "Create notification",
+    description: "Create new system notification",
     icon: "📢",
     fields: [
-      { key: "title", label: "Заголовок", type: "text", required: true },
-      { key: "message", label: "Сообщение", type: "textarea", required: true },
-      { key: "isAlert", label: "Важное уведомление", type: "checkbox", defaultValue: false }
+      { key: "title", label: "Title", type: "text", required: true },
+      { key: "message", label: "Message", type: "textarea", required: true },
+      { key: "isAlert", label: "Important notification", type: "checkbox", defaultValue: false }
     ]
   },
   users: {
-    title: "Создать пользователя",
-    description: "Добавление нового пользователя в систему",
+    title: "Create user",
+    description: "Add new user to the system",
     icon: "👥",
     fields: [
-      { key: "name", label: "Имя", type: "text", required: true },
-      { key: "email", label: "Email", type: "email", required: true },
-      { key: "role", label: "Роль", type: "select", required: true, options: [
-        { value: "user", label: "Пользователь" },
-        { value: "moderator", label: "Модератор" },
-        { value: "admin", label: "Администратор" }
-      ]},
-      { key: "isActive", label: "Активен", type: "checkbox", defaultValue: true }
+      { key: "username", label: "Username", type: "text", required: true },
+      { key: "tgId", label: "Telegram ID", type: "number", required: true },
+      { key: "balance", label: "Balance", type: "number", required: true },
+      { key: "inviterId", label: "Inviter ID", type: "text", required: false },
     ]
   },
   appWallet: {

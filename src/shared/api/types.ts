@@ -45,27 +45,114 @@ export interface RefreshResponse {
   user: AuthUser;
 }
 
-// Типы для пользователей (пример)
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  createdAt: string;
-  updatedAt: string;
+// ============================================================================
+// ТИПЫ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ (обновлено под новый бэкенд)
+// ============================================================================
+
+export interface VipLevel {
+  id: number;
+  quantAmount: number;
+  quantMultiplier: number;
+  dailyProfit: string;
 }
 
-export interface CreateUserData {
-  email: string;
-  name: string;
-  password: string;
-  role: string;
+export interface UserReference {
+  id: string;
+  username?: string;
+  tgId: string;
+}
+
+export interface UserAdditionalData {
+  region?: string;
+  ipAddress?: string;
+  lastLoginAt?: string;
+}
+
+export interface UserStats {
+  referralsCount: number;
+  operationsCount: number;
+}
+
+export interface User {
+  id: string;
+  tgId: string;
+  username?: string;
+  balance: number;
+  createdAt: string;
+  updatedAt?: string;
+  lastActivityAt?: string;
+  vipLevel?: VipLevel;
+  inviter?: UserReference;
+  stats: UserStats;
+  additionalData?: UserAdditionalData;
+  withdrawComissionStatus?: string;
+}
+
+export interface UserListQuery {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: 'id' | 'username' | 'balance' | 'createdAt' | 'lastActivityAt';
+  sortOrder?: 'asc' | 'desc';
+  status?: 'all' | 'active' | 'inactive';
+  minBalance?: number;
+  maxBalance?: number;
 }
 
 export interface UpdateUserData {
-  email?: string;
-  name?: string;
-  role?: string;
+  username?: string;
+  balance?: number;
+  vipLevelId?: number;
+  isBlocked?: boolean;
+}
+
+export interface DeleteUserData {
+  deleteOperations?: boolean;
+  reason?: string;
+}
+
+export interface UserPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+export interface UserListResponse {
+  success: boolean;
+  data: User[];
+  pagination: UserPagination;
+  message: string;
+}
+
+export interface UserResponse {
+  success: boolean;
+  data: User | null;
+  message: string;
+}
+
+export interface UserStatsData {
+  period: string;
+  totalUsers: number;
+  newUsers: number;
+  activeUsers: number;
+  inactiveUsers: number;
+  usersWithOperations: number;
+  usersWithoutOperations: number;
+  balanceStats: {
+    total: number;
+    average: number;
+  };
+  activityRate: string;
+  operationsRate: string;
+}
+
+export interface UserStatsResponse {
+  success: boolean;
+  data: UserStatsData;
+  message: string;
 }
 
 // ============================================================================

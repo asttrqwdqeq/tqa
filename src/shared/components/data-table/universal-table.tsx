@@ -105,27 +105,27 @@ export function AdvancedUniversalTable<T>({
 
   return (
     <div className="space-y-4">
-      {/* Дополнительные фильтры */}
+      {/* Additional filters */}
       {config.filters && config.filters.length > 0 && (
         <div className="flex flex-wrap gap-4 p-4 bg-muted/50 rounded-lg">
-          {/* TODO: Реализовать компоненты фильтров */}
+          {/* TODO: Implement filter components */}
           <div className="text-sm text-muted-foreground">
-            Фильтры будут реализованы в следующей версии
+            Filters will be implemented in the next version
           </div>
         </div>
       )}
 
-      {/* Информация о выбранных строках */}
+      {/* Information about selected rows */}
       {config.selectable && selectedRows.length > 0 && (
         <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
           <span className="text-sm text-blue-700">
-            Выбрано: {selectedRows.length} элементов
+            Selected: {selectedRows.length} elements
           </span>
           <button
             onClick={() => setSelectedRows([])}
             className="text-sm text-blue-600 hover:text-blue-800"
           >
-            Очистить выбор
+            Clear selection
           </button>
         </div>
       )}
@@ -135,7 +135,7 @@ export function AdvancedUniversalTable<T>({
         data={data}
         isLoading={isLoading}
         searchKey={config.searchKey}
-        searchPlaceholder={config.searchPlaceholder || "Поиск..."}
+        searchPlaceholder={config.searchPlaceholder || "Search..."}
         onRowClick={config.onRowClick}
         onRowSelect={config.selectable ? handleRowSelect : undefined}
         enableRowSelection={config.selectable}
@@ -144,17 +144,17 @@ export function AdvancedUniversalTable<T>({
         actions={filteredActions}
       />
 
-      {/* Экспорт */}
+      {/* Export */}
       {config.exportable && (
         <div className="flex justify-end">
           <button
             onClick={() => {
-              // TODO: Реализовать экспорт
-              console.log('Экспорт данных:', data)
+              // TODO: Implement export
+              console.log('Export data:', data)
             }}
             className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md"
           >
-            Экспорт в CSV
+            Export to CSV
           </button>
         </div>
       )}

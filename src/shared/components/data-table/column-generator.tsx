@@ -16,7 +16,7 @@ function formatDate(date: string | Date, config?: { format?: string; locale?: st
   const dateObj = typeof date === 'string' ? new Date(date) : date
   
   if (!dateObj || isNaN(dateObj.getTime())) {
-    return 'Неверная дата'
+    return 'Invalid date'
   }
 
   const formatStr = config?.format || 'dd.MM.yyyy HH:mm'
@@ -40,14 +40,14 @@ function renderBoolean(value: boolean, config?: {
   falseVariant?: "default" | "secondary" | "destructive" | "outline"
 }) {
   const label = value 
-    ? (config?.trueLabel || 'Да')
-    : (config?.falseLabel || 'Нет')
+    ? (config?.trueLabel || 'Yes')
+    : (config?.falseLabel || 'No')
   
   const variant = value 
     ? (config?.trueVariant || 'default')
     : (config?.falseVariant || 'secondary')
   
-  return <Badge variant={variant}>{label}</Badge>
+  return <Badge variant={variant}>{label}</Badge> 
 }
 
 // Основная функция для генерации колонки
@@ -242,21 +242,21 @@ export const commonColumns = {
   
   // Заголовок/название
   title: (key = "title", options?: Partial<ColumnConfig>): ColumnConfig =>
-    columnHelpers.text(key, "Заголовок", options),
+    columnHelpers.text(key, "Title", options),
   
   // Статус с badge
   status: (colorMap?: Record<string, any>, options?: Partial<ColumnConfig>): ColumnConfig =>
-    columnHelpers.badge("status", "Статус", colorMap, {
+    columnHelpers.badge("status", "Status", colorMap, {
       width: 120,
       ...options
     }),
   
   // Активность
   isActive: (options?: Partial<ColumnConfig>): ColumnConfig =>
-    columnHelpers.boolean("isActive", "Активно", {
+    columnHelpers.boolean("isActive", "Active", {
       booleanConfig: {
-        trueLabel: "Активно",
-        falseLabel: "Неактивно",
+        trueLabel: "Active",
+        falseLabel: "Inactive",
         trueVariant: "default",
         falseVariant: "secondary"
       },

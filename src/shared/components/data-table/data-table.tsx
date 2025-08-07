@@ -66,7 +66,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
-  searchPlaceholder = "Поиск...",
+  searchPlaceholder = "Search...",
   isLoading = false,
   onRowClick,
   onRowSelect,
@@ -94,12 +94,12 @@ export function DataTable<TData, TValue>({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Открыть меню</span>
+                <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Действия</DropdownMenuLabel>
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
               {actions.map((action, index) => (
                 <DropdownMenuItem
                   key={index}
@@ -187,7 +187,7 @@ export function DataTable<TData, TValue>({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
-                Колонки <ChevronDown className="ml-2 h-4 w-4" />
+                Columns <ChevronDown className="ml-2 h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -268,7 +268,7 @@ export function DataTable<TData, TValue>({
                   colSpan={tableColumns.length}
                   className="h-24 text-center"
                 >
-                  Загрузка...
+                  Loading...
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows?.length ? (
@@ -295,7 +295,7 @@ export function DataTable<TData, TValue>({
                   colSpan={tableColumns.length}
                   className="h-24 text-center"
                 >
-                  Нет данных.
+                  No data.
                 </TableCell>
               </TableRow>
             )}
@@ -307,8 +307,8 @@ export function DataTable<TData, TValue>({
       <div className="flex items-center justify-end space-x-2 py-4">
         {enableRowSelection && (
           <div className="flex-1 text-sm text-muted-foreground">
-            {table.getFilteredSelectedRowModel().rows.length} из{" "}
-            {table.getFilteredRowModel().rows.length} строк выбрано.
+            {table.getFilteredSelectedRowModel().rows.length} of{" "}
+            {table.getFilteredRowModel().rows.length} rows selected.
           </div>
         )}
         
@@ -316,7 +316,7 @@ export function DataTable<TData, TValue>({
           // Серверная пагинация
           <div className="flex items-center space-x-2">
             <p className="text-sm font-medium">
-              Страница {pagination.pageIndex + 1} из {pagination.pageCount}
+              Page {pagination.pageIndex + 1} of {pagination.pageCount}
             </p>
             <Button
               variant="outline"
@@ -329,7 +329,7 @@ export function DataTable<TData, TValue>({
               }
               disabled={pagination.pageIndex === 0}
             >
-              Назад
+              Back
             </Button>
             <Button
               variant="outline"
@@ -342,14 +342,14 @@ export function DataTable<TData, TValue>({
               }
               disabled={pagination.pageIndex >= pagination.pageCount - 1}
             >
-              Вперед
+              Forward
             </Button>
           </div>
         ) : (
-          // Клиентская пагинация
+          // Client pagination
           <div className="flex items-center space-x-2">
             <p className="text-sm font-medium">
-              Страница {table.getState().pagination.pageIndex + 1} из{" "}
+              Page {table.getState().pagination.pageIndex + 1} of{" "}
               {table.getPageCount()}
             </p>
             <Button
@@ -358,7 +358,7 @@ export function DataTable<TData, TValue>({
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
             >
-              Назад
+              Back
             </Button>
             <Button
               variant="outline"
@@ -366,7 +366,7 @@ export function DataTable<TData, TValue>({
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
             >
-              Вперед
+              Forward
             </Button>
           </div>
         )}
