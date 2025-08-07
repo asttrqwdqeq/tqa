@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usersApi } from '@/shared/api/users';
-import { CreateUserData, UpdateUserData } from '@/shared/api/types';
+import { UpdateUserData } from '@/shared/api/types';
 import { toast } from 'sonner'; // Если используете sonner для уведомлений
+import { CreateUserData } from '@/shared/hooks';
 
 // Ключи для кэширования
 export const userKeys = {
@@ -17,8 +18,8 @@ export function useUsers(params?: {
   page?: number;
   limit?: number;
   search?: string;
-  role?: string;
-}) {
+  role?: string;  
+}) {  
   return useQuery({
     queryKey: userKeys.list(params),
     queryFn: () => usersApi.getUsers(params),
@@ -35,27 +36,6 @@ export function useUser(id: string, enabled = true) {
     queryKey: userKeys.detail(id),
     queryFn: () => usersApi.getUser(id),
     enabled: !!id && enabled,
-  });
-}
-
-// Хук для создания пользователя
-export function useCreateUser() {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: CreateUserData) => usersApi.createUser(data),
-    onSuccess: (newUser) => {
-      // Инвалидируем кэш списка пользователей
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() });
-      
-      // Добавляем нового пользователя в кэш деталей
-      queryClient.setQueryData(userKeys.detail(newUser.id), newUser);
-      
-      toast?.success('Пользователь успешно создан');
-    },
-    onError: (error: any) => {
-      toast?.error(error.message || 'Ошибка при создании пользователя');
-    },
   });
 }
 

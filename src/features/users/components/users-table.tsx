@@ -96,9 +96,9 @@ export function UsersTable() {
                     key={user.id}
                     onMouseEnter={() => prefetchUser(user.id)} // Предзагрузка при наведении
                   >
-                    <TableCell>{user.name}</TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.role}</TableCell>
+                    <TableCell>{user.username}</TableCell>
+                    <TableCell>{user.tgId}</TableCell>
+                    <TableCell>{user.balance}</TableCell>
                     <TableCell>
                       {new Date(user.createdAt).toLocaleDateString()}
                     </TableCell>
@@ -126,7 +126,7 @@ export function UsersTable() {
             {data && (
               <div className="flex items-center justify-between mt-4">
                 <p className="text-sm text-muted-foreground">
-                  Показано {data.data.length} из {data.meta.total} пользователей
+                  Показано {data.data.length} из {data.pagination.totalPages || 1} пользователей
                 </p>
                 
                 <div className="flex gap-2">
@@ -140,15 +140,15 @@ export function UsersTable() {
                   </Button>
                   
                   <span className="px-3 py-1 text-sm">
-                    Страница {page} из {data.meta.totalPages}
+                    Страница {page} из {data.pagination.totalPages}
                   </span>
                   
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setPage(page + 1)}
-                    disabled={page >= data.meta.totalPages}
-                  >
+                    disabled={page >= data.pagination.totalPages}
+                  > 
                     Следующая
                   </Button>
                 </div>

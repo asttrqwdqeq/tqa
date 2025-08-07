@@ -84,7 +84,7 @@ export interface CreateUserData {
   balance: number
   vipLevelId: number
   inviterId?: string
-  appWalletId: string
+  appWalletId?: string
 }
 
 export interface UpdateUserData {
