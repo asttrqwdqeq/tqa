@@ -76,11 +76,9 @@ import {
 } from '@/shared/hooks'
 
 // Хук для получения данных модели с использованием универсального API
-function useModelData(model: string) {
-  const { page, pageSize, params } = useModelPagination(1, 10)
-  
+function useModelData(model: string, paginationParams: { page: number; limit: number }) {
   // Используем универсальный хук
-  const { data: apiData, isLoading, error } = useModelList(model, params, {
+  const { data: apiData, isLoading, error } = useModelList(model, paginationParams, {
     enabled: ['notifications', 'appWallet', 'users'].includes(model), // Включаем реальный API для notifications и appWallet
     staleTime: 1000 * 60 * 2, // 2 минуты кэширование
   })
@@ -90,8 +88,8 @@ function useModelData(model: string) {
     return { 
       isLoading: false, 
       error: null,
-      page: page || 1,
-      pageSize: pageSize || 10
+      data: [],
+      total: 0
     }
   }
   
@@ -101,17 +99,15 @@ function useModelData(model: string) {
       data: apiData.data || [],
       total: apiData.total || 0,
       isLoading,
-      error: null,
-      page: page || 1,
-      pageSize: pageSize || 10
+      error: null
     }
   }
   
   return { 
     isLoading, 
     error: null, 
-    page: page || 1, 
-    pageSize: pageSize || 10 
+    data: [],
+    total: 0
   }
 }
 
@@ -332,9 +328,11 @@ export default function ModelPage({ params }: PageProps) {
   const { model } = resolvedParams
   const router = useRouter()
   
-  // Используем универсальные хуки
-  const { data, total, isLoading, page, pageSize } = useModelData(model)
-  const { page: currentPage, pageSize: currentPageSize, paginationConfig } = useModelPagination(1, 10)
+  // Единый хук для пагинации
+  const { page, pageSize, paginationConfig, params: paginationParams } = useModelPagination(1, 10)
+  
+  // Используем универсальные хуки с правильными параметрами пагинации
+  const { data, total, isLoading } = useModelData(model, paginationParams)
   const deleteMutation = useDeleteModel(model)
   const { prefetchItem } = usePrefetchModel()
   
@@ -433,7 +431,7 @@ export default function ModelPage({ params }: PageProps) {
           <CardContent>
             <div className="text-2xl font-bold">{data?.length || 0}</div>
             <p className="text-xs text-muted-foreground">
-              Page {page || 1} of {Math.ceil((total || 0) / (pageSize || 10))}
+              Page {page} of {Math.ceil((total || 0) / pageSize)}
             </p>
           </CardContent>
         </Card>
@@ -523,7 +521,7 @@ export default function ModelPage({ params }: PageProps) {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-muted-foreground">Total pages:</dt>
-                  <dd>{Math.ceil((total || 0) / (pageSize || 10))}</dd>
+                  <dd>{Math.ceil((total || 0) / pageSize)}</dd>
                 </div>
               </dl>
             </div>
