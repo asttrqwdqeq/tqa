@@ -17,7 +17,8 @@ import {
   Hash,
   RefreshCw,
   FileText,
-  AlertCircle
+  AlertCircle,
+  Pencil
 } from "lucide-react"
 import { useDeposit, type DepositEntity } from "@/shared/hooks"
 import { useRouter } from 'next/navigation'
@@ -189,10 +190,16 @@ export default function DepositDetailPage({ params }: PageProps) {
             <p className="text-muted-foreground">ID: {deposit.id}</p>
           </div>
         </div>
-        <Button variant="outline" onClick={() => refetch()}>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => router.push(`/dashboard/deposits/${id}/edit`)}>
+            <Pencil className="w-4 h-4 mr-2" />
+            Редактировать
+          </Button>
+          <Button variant="outline" onClick={() => refetch()}>
           <RefreshCw className="w-4 h-4 mr-2" />
           Обновить
-        </Button>
+          </Button>
+        </div>
       </div>
 
       {/* Статус операции */}

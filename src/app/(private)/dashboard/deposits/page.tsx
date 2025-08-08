@@ -23,7 +23,8 @@ import {
   CheckCircle,
   XCircle,
   MoreVertical,
-  Calendar
+  Calendar,
+  Pencil
 } from "lucide-react"
 import { 
   useDeposits, 
@@ -74,6 +75,10 @@ export default function DepositsPage() {
 
   const handleViewDeposit = (id: string) => {
     router.push(`/dashboard/deposits/${id}`)
+  }
+
+  const handleEditDeposit = (id: string) => {
+    router.push(`/dashboard/deposits/${id}/edit`)
   }
 
   const handleExport = () => {
@@ -369,6 +374,10 @@ export default function DepositsPage() {
                             <DropdownMenuItem onClick={() => handleViewDeposit(deposit.id)}>
                               <Eye className="mr-2 h-4 w-4" />
                               Просмотр
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditDeposit(deposit.id)}>
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Редактировать
                             </DropdownMenuItem>
                             {deposit.txHash && (
                               <DropdownMenuItem onClick={() => navigator.clipboard.writeText(deposit.txHash!)}>
