@@ -24,11 +24,13 @@ import {
   XCircle,
   MoreVertical,
   Calendar,
-  Pencil
+  Pencil,
+  User
 } from "lucide-react"
 import { 
   useDeposits, 
   useDepositStats,
+  useDeleteModel,
   type DepositEntity,
   type DepositSearchParams 
 } from "@/shared/hooks"
@@ -83,6 +85,19 @@ export default function DepositsPage() {
 
   const handleExport = () => {
     toast.success("Экспорт начат")
+  }
+
+  const handleGoToUser = (userId: string) => {
+    router.push(`/dashboard/users/update?id=${userId}`)
+  }
+
+  const deleteMutation = useDeleteModel('deposits', {
+    onSuccess: () => refetch(),
+  })
+
+  const handleDeleteDeposit = (id: string) => {
+    if (!confirm('Удалить депозит? Действие необратимо.')) return
+    deleteMutation.mutate(id)
   }
 
   // Утилиты
@@ -378,6 +393,14 @@ export default function DepositsPage() {
                             <DropdownMenuItem onClick={() => handleEditDeposit(deposit.id)}>
                               <Pencil className="mr-2 h-4 w-4" />
                               Редактировать
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleGoToUser(deposit.userId)}>
+                              <User className="mr-2 h-4 w-4" />
+                              К пользователю
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleDeleteDeposit(deposit.id)}>
+                              <XCircle className="mr-2 h-4 w-4 text-red-600" />
+                              Удалить
                             </DropdownMenuItem>
                             {deposit.txHash && (
                               <DropdownMenuItem onClick={() => navigator.clipboard.writeText(deposit.txHash!)}>

@@ -20,7 +20,7 @@ import {
   AlertCircle,
   Pencil
 } from "lucide-react"
-import { useDeposit, type DepositEntity } from "@/shared/hooks"
+import { useDeposit, useDeleteModel, type DepositEntity } from "@/shared/hooks"
 import { useRouter } from 'next/navigation'
 import { toast } from "sonner"
 
@@ -34,6 +34,9 @@ export default function DepositDetailPage({ params }: PageProps) {
   
   const { data: deposit, isLoading, error, refetch } = useDeposit(id, {
     enabled: !!id
+  })
+  const deleteMutation = useDeleteModel('deposits', {
+    onSuccess: () => router.push('/dashboard/deposits')
   })
 
   const handleCopy = (text: string, label: string) => {
@@ -194,6 +197,16 @@ export default function DepositDetailPage({ params }: PageProps) {
           <Button variant="outline" onClick={() => router.push(`/dashboard/deposits/${id}/edit`)}>
             <Pencil className="w-4 h-4 mr-2" />
             Редактировать
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              if (!confirm('Удалить депозит? Действие необратимо.')) return
+              deleteMutation.mutate(id)
+            }}
+          >
+            <XCircle className="w-4 h-4 mr-2" />
+            Удалить
           </Button>
           <Button variant="outline" onClick={() => refetch()}>
           <RefreshCw className="w-4 h-4 mr-2" />
@@ -456,6 +469,14 @@ export default function DepositDetailPage({ params }: PageProps) {
             >
               <User className="w-4 h-4 mr-2" />
               Все операции пользователя
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => router.push(`/dashboard/users/update?id=${deposit.userId}`)}
+            >
+              <User className="w-4 h-4 mr-2" />
+              Перейти к пользователю
             </Button>
           </div>
         </CardContent>
