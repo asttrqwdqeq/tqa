@@ -3,12 +3,13 @@
 import { use } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, Save, X, Trash2 } from "lucide-react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 import { useEffect } from "react"
 
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { Input } from "@/shared/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, Textarea } from "@/shared/components/ui"
 import { Label } from "@/shared/components/ui/label"
 import { Badge } from "@/shared/components/ui/badge"
 import { Alert, AlertDescription } from "@/shared/components/ui/alert"
@@ -71,7 +72,18 @@ const modelConfigs: Record<string, ModelConfig> = {
     description: "Edit existing app wallet",
     icon: "💰",
     fields: [
-      { key: "id", label: "Wallet ID", type: "text", required: true }
+      { key: "id", label: "Wallet ID", type: "text", required: true },
+      { 
+        key: "currency", 
+        label: "Currency", 
+        type: "select", 
+        required: true,
+        options: [
+          { value: "TON", label: "TON" },
+          { value: "USDT", label: "USDT" },
+          { value: "USDC", label: "USDC" },
+        ]
+      }
     ]
   }
 }
@@ -176,7 +188,7 @@ export default function UpdateModelPage({ params }: PageProps) {
   const updateMutation = useUpdateMutation(model, router, id || undefined)
   const deleteMutation = useDeleteMutation(model, router)
   
-  const { register, handleSubmit, formState: { isSubmitting }, reset } = useForm()
+  const { register, handleSubmit, formState: { isSubmitting }, reset, control } = useForm()
   
   // Простая загрузка данных в форму при каждом обновлении
   useEffect(() => {
@@ -429,29 +441,40 @@ export default function UpdateModelPage({ params }: PageProps) {
                     )}
                     
                     {field.type === "textarea" && (
-                      <textarea
+                      <Textarea
                         id={field.key}
                         placeholder={`Enter ${field.label.toLowerCase()}`}
                         readOnly={field.readonly}
-                        className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                         {...register(field.key, { required: field.required })}
                       />
                     )}
                     
                     {field.type === "select" && field.options && (
-                      <select
-                        id={field.key}
-                        disabled={field.readonly}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        {...register(field.key, { required: field.required })}
-                      >
-                        <option value="">Select {field.label.toLowerCase()}</option>
-                        {field.options.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                      <Controller
+                        name={field.key}
+                        control={control}
+                        rules={{ required: field.required }}
+                        defaultValue={field.defaultValue || ''}
+                        render={({ field: controllerField }) => (
+                          <Select
+                            key={String(controllerField.value ?? field.defaultValue ?? '')}
+                            value={(controllerField.value ?? (field.defaultValue ?? '')) as string}
+                            onValueChange={controllerField.onChange}
+                            disabled={field.readonly}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {field.options?.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            )) || []}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      />
                     )}
                     
                     {field.type === "checkbox" && (

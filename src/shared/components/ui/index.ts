@@ -3,6 +3,17 @@ export { Button } from './button'
 export { Input } from './input'
 export { Label } from './label'
 export { Badge } from './badge'
+export { 
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+  SelectGroup,
+  SelectLabel,
+  SelectSeparator,
+} from './select'
+export { Textarea } from './textarea'
 export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card'
 export { Alert, AlertDescription, AlertTitle } from './alert'
 export { 

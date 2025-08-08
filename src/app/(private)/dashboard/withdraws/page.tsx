@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Badge } from "@/shared/components/ui/badge"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/shared/components/ui"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/components/ui/table"
 import { 
   DropdownMenu, 
@@ -277,28 +278,36 @@ export default function WithdrawsPage() {
             </div>
 
             {/* Статус */}
-            <select
-              value={params.status || ''}
-              onChange={(e) => updateParams({ status: e.target.value as WithdrawEntity['status'] || undefined })}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+            <Select
+              value={params.status || 'ALL'}
+              onValueChange={(value) => updateParams({ status: (value === 'ALL' ? undefined : (value as WithdrawEntity['status'])) })}
             >
-              <option value="">Все статусы</option>
-              <option value="PENDING">Ожидает</option>
-              <option value="COMPLETED">Завершен</option>
-              <option value="FAILED">Отклонен</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Все статусы" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Все статусы</SelectItem>
+                <SelectItem value="PENDING">Ожидает</SelectItem>
+                <SelectItem value="COMPLETED">Завершен</SelectItem>
+                <SelectItem value="FAILED">Отклонен</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* Валюта */}
-            <select
-              value={params.currency || ''}
-              onChange={(e) => updateParams({ currency: e.target.value as WithdrawEntity['currency'] || undefined })}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+            <Select
+              value={params.currency || 'ALL'}
+              onValueChange={(value) => updateParams({ currency: (value === 'ALL' ? undefined : (value as WithdrawEntity['currency'])) })}
             >
-              <option value="">Все валюты</option>
-              <option value="USDT">USDT</option>
-              <option value="USDC">USDC</option>
-              <option value="TON">TON</option>
-            </select>
+              <SelectTrigger>
+                <SelectValue placeholder="Все валюты" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">Все валюты</SelectItem>
+                <SelectItem value="USDT">USDT</SelectItem>
+                <SelectItem value="USDC">USDC</SelectItem>
+                <SelectItem value="TON">TON</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           {/* Кнопка поиска для мобильных устройств */}

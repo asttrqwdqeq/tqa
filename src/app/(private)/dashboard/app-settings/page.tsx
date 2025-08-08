@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { Button } from "@/shared/components/ui/button"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
+import { Textarea } from "@/shared/components/ui"
 import { Badge } from "@/shared/components/ui/badge"
 // import { Separator } from "@/shared/components/ui/separator"
 import { toast } from "sonner"
@@ -371,11 +372,11 @@ export default function AppSettingsPage() {
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="import-data">JSON данные</Label>
-                <textarea
+                <Textarea
                   id="import-data"
                   value={importData}
                   onChange={(e) => setImportData(e.target.value)}
-                  className="w-full h-32 rounded border border-input bg-background px-3 py-2 text-sm font-mono"
+                  className="w-full h-32 font-mono"
                   placeholder="{ ... }"
                 />
               </div>

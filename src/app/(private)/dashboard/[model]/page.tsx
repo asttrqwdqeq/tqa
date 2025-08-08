@@ -66,6 +66,8 @@ interface OrderEntity extends BaseEntity {
 
 interface AppWalletEntity extends BaseEntity {
   userCount?: number
+  user?: any[]
+  currency?: 'TON' | 'USDT' | 'USDC'
 }
 
 import { 
@@ -283,12 +285,12 @@ function getTableConfig(
       return {
         columns: [
           commonColumns.id({ width: 200 }),
-          columnHelpers.custom("userCount", "Users", (value, row: AppWalletEntity) => (
+          columnHelpers.text("currency", "Currency", { width: 120 }),
+          columnHelpers.custom("user", "Users", (_value, row: AppWalletEntity) => (
             <span className="text-sm font-medium">
-              {row.userCount || 0}
+              {Array.isArray(row.user) ? row.user.length : (row.userCount || 0)}
             </span>
           ), { width: 120 }),
-          commonColumns.createdAt({ width: 180 })
         ],
         searchKey: "id",
         searchPlaceholder: "Search by ID...",

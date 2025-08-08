@@ -3,13 +3,14 @@
 import { use } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Save, X } from "lucide-react"
-import { useForm } from "react-hook-form"
+import { useForm, Controller } from "react-hook-form"
 
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
 import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Badge } from "@/shared/components/ui/badge"
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Textarea } from "@/shared/components/ui"
 import { useCreateModel } from "@/shared/hooks"
 
 // Типы для полей формы
@@ -58,7 +59,18 @@ const modelConfigs: Record<string, ModelConfig> = {
     description: "Create new app wallet in the system",
     icon: "💰",
     fields: [
-      { key: "id", label: "Wallet ID", type: "text", required: true }
+      { key: "id", label: "Wallet ID", type: "text", required: true },
+      {
+        key: "currency",
+        label: "Currency",
+        type: "select",
+        required: true,
+        options: [
+          { value: "TON", label: "TON" },
+          { value: "USDT", label: "USDT" },
+          { value: "USDC", label: "USDC" },
+        ],
+      },
     ]
   }
 }
@@ -79,7 +91,7 @@ export default function CreateModelPage({ params }: PageProps) {
     onSuccess: () => router.push(`/dashboard/${model}`),
   })
   
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm()
+  const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm()
 
   if (!modelConfig) {
     return (
@@ -214,27 +226,38 @@ export default function CreateModelPage({ params }: PageProps) {
                   )}
                   
                   {field.type === "textarea" && (
-                    <textarea
+                    <Textarea
                       id={field.key}
                       placeholder={`Enter ${field.label.toLowerCase()}`}
-                      className="flex min-h-[120px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="min-h-[120px]"
                       {...register(field.key, { required: field.required })}
                     />
                   )}
                   
                   {field.type === "select" && field.options && (
-                    <select
-                      id={field.key}
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                      {...register(field.key, { required: field.required })}
-                    >
-                      <option value="">Select {field.label.toLowerCase()}</option>
-                      {field.options.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
+                    <Controller
+                      name={field.key}
+                      control={control}
+                      rules={{ required: field.required }}
+                      render={({ field: controllerField }) => (
+                        <Select
+                          key={String(controllerField.value ?? field.defaultValue ?? '')}
+                          value={(controllerField.value ?? (field.defaultValue ?? '')) as string}
+                          onValueChange={controllerField.onChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={`Select ${field.label.toLowerCase()}`} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {field.options?.map((option) => (
+                              <SelectItem key={option.value} value={option.value}>
+                                {option.label}
+                              </SelectItem>
+                            )) || []}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    />
                   )}
                   
                   {field.type === "checkbox" && (

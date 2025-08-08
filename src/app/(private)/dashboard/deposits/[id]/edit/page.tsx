@@ -1,7 +1,7 @@
 "use client"
 
 import { use, useEffect } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { useRouter } from 'next/navigation'
 import { Save, ArrowLeft } from 'lucide-react'
 
@@ -10,6 +10,7 @@ import { Button } from '@/shared/components/ui/button'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Badge } from '@/shared/components/ui/badge'
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/shared/components/ui'
 
 import { useDeposit, useUpdateModel, type DepositEntity } from '@/shared/hooks'
 
@@ -29,7 +30,7 @@ export default function EditDepositPage({ params }: PageProps) {
     onSuccess: () => router.push(`/dashboard/deposits/${id}`)
   })
 
-  const { register, handleSubmit, reset } = useForm<Partial<DepositEntity>>()
+  const { register, handleSubmit, reset, control } = useForm<Partial<DepositEntity>>()
 
   // Заполняем форму после загрузки
   useEffect(() => {
@@ -98,21 +99,49 @@ export default function EditDepositPage({ params }: PageProps) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="currency">Currency</Label>
-              <select id="currency" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" {...register('currency')}>
-                <option value="">Not change</option>
-                <option value="USDT">USDT</option>
-                <option value="USDC">USDC</option>
-                <option value="TON">TON</option>
-              </select>
+              <Controller
+                name="currency"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    key={String(field.value ?? deposit?.currency ?? '')}
+                    value={(field.value ?? (deposit?.currency ?? '')) as string}
+                    onValueChange={(v) => field.onChange(v === '' ? undefined : v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Not change" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="USDT">USDT</SelectItem>
+                      <SelectItem value="USDC">USDC</SelectItem>
+                      <SelectItem value="TON">TON</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="status">Status</Label>
-              <select id="status" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" {...register('status')}>
-                <option value="">Not change</option>
-                <option value="PENDING">PENDING</option>
-                <option value="COMPLETED">COMPLETED</option>
-                <option value="FAILED">FAILED</option>
-              </select>
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    key={String(field.value ?? deposit?.status ?? '')}
+                    value={(field.value ?? (deposit?.status ?? '')) as string}
+                    onValueChange={(v) => field.onChange(v === '' ? undefined : v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Not change" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PENDING">PENDING</SelectItem>
+                      <SelectItem value="COMPLETED">COMPLETED</SelectItem>
+                      <SelectItem value="FAILED">FAILED</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
             </div>
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="userWallet">App wallet</Label>
