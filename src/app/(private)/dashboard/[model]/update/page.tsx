@@ -518,7 +518,17 @@ export default function UpdateModelPage({ params }: PageProps) {
               </Button>
 
 
-              
+              {model === 'users' && (data as any)?.inviterId && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={() => router.push(`/dashboard/users/update?id=${(data as any).inviterId}`)}
+                  disabled={updateMutation.isPending || deleteMutation.isPending}
+                >
+                  Go to inviter
+                </Button>
+              )}
+
               <Button 
                 type="button" 
                 variant="destructive"

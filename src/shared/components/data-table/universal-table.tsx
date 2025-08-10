@@ -40,6 +40,7 @@ export function UniversalTable<T>({
       data={data}
       isLoading={isLoading}
       searchKey={config.searchKey}
+      searchKeys={config.searchKeys}
       searchPlaceholder={config.searchPlaceholder}
       onRowClick={onRowClick}
       enableRowSelection={config.enableRowSelection}
@@ -135,6 +136,7 @@ export function AdvancedUniversalTable<T>({
         data={data}
         isLoading={isLoading}
         searchKey={config.searchKey}
+        searchKeys={config.searchKeys}
         searchPlaceholder={config.searchPlaceholder || "Search..."}
         onRowClick={config.onRowClick}
         onRowSelect={config.selectable ? handleRowSelect : undefined}

@@ -261,8 +261,8 @@ function getTableConfig(
           }),
           commonColumns.createdAt({ width: 150 })
         ],
-        searchKey: "username",
-        searchPlaceholder: "Search by username or Telegram ID...",
+        searchKeys: ["id", "tgId", "username"],
+        searchPlaceholder: "Search by ID, Telegram ID or Username...",
         selectable: true,
         actions: [
           ...baseActions,

@@ -1,4 +1,4 @@
-import { ColumnDef } from "@tanstack/react-table"
+import { ColumnDef, Row } from "@tanstack/react-table"
 
 // Базовые типы для колонок
 export interface BaseColumnConfig {
@@ -65,6 +65,9 @@ export interface ColumnConfig extends BaseColumnConfig {
   
   // Функция форматирования значения
   format?: (value: any) => string
+
+  // Кастомная функция фильтрации для колонки
+  filterFn?: (row: Row<any>, columnId: string, filterValue: unknown) => boolean
   
   // CSS классы
   cellClassName?: string
@@ -75,6 +78,7 @@ export interface ColumnConfig extends BaseColumnConfig {
 export interface TableConfig<T = any> {
   columns: ColumnConfig[]
   searchKey?: string
+  searchKeys?: string[]
   searchPlaceholder?: string
   defaultSort?: {
     key: string

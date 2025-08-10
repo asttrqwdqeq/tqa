@@ -40,6 +40,7 @@ export interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   searchKey?: string
+  searchKeys?: string[]
   searchPlaceholder?: string
   isLoading?: boolean
   onRowClick?: (row: TData) => void
@@ -66,6 +67,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   searchKey,
+  searchKeys,
   searchPlaceholder = "Search...",
   isLoading = false,
   onRowClick,
@@ -82,9 +84,39 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
 
-  // Добавляем колонку действий если они переданы
+  // Виртуальная колонка для объединенного поиска по нескольким полям
+  const combinedSearchColumn = React.useMemo<ColumnDef<TData> | undefined>(() => {
+    if (!searchKeys || searchKeys.length === 0) return undefined
+    const COMBINED_ID = "__combined_search__"
+    return {
+      id: COMBINED_ID,
+      enableHiding: true,
+      // Пользовательская функция фильтрации: строка подходит, если ХОТЯ БЫ ОДНО поле совпало
+      filterFn: (row, _columnId, filterValue) => {
+        const needle = String(filterValue ?? "").toLowerCase().trim()
+        if (!needle) return true
+        return searchKeys.some((key) => {
+          // Пытаемся получить значение через существующую колонку, иначе из оригинальной строки
+          const viaColumn = row.getValue<any>(key)
+          const value = viaColumn ?? (row.original as any)?.[key]
+          if (value == null) return false
+          return String(value).toLowerCase().includes(needle)
+        })
+      },
+    }
+  }, [searchKeys])
+
+  // Прячем объединенную колонку из отображения
+  React.useEffect(() => {
+    if (combinedSearchColumn?.id) {
+      setColumnVisibility((prev) => ({ ...prev, [combinedSearchColumn.id as string]: false }))
+    }
+  }, [combinedSearchColumn?.id])
+
+  // Собираем итоговые колонки (оригинальные + виртуальная для поиска + действия)
   const tableColumns = React.useMemo(() => {
-    if (!actions || actions.length === 0) return columns
+    const withSearch = combinedSearchColumn ? [...columns, combinedSearchColumn] : columns
+    if (!actions || actions.length === 0) return withSearch
 
     const actionsColumn: ColumnDef<TData> = {
       id: "actions",
@@ -116,8 +148,8 @@ export function DataTable<TData, TValue>({
       },
     }
 
-    return [...columns, actionsColumn]
-  }, [columns, actions])
+    return [...withSearch, actionsColumn]
+  }, [columns, combinedSearchColumn, actions])
 
   const table = useReactTable({
     data,
@@ -171,13 +203,23 @@ export function DataTable<TData, TValue>({
       {/* Панель управления */}
       <div className="flex items-center py-4">
         {/* Поиск */}
-        {enableFiltering && searchKey && (
+        {enableFiltering && (searchKeys?.length || searchKey) && (
           <Input
             placeholder={searchPlaceholder}
-            value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ""}
-            onChange={(event) =>
-              table.getColumn(searchKey)?.setFilterValue(event.target.value)
-            }
+            value={(() => {
+              if (searchKeys && searchKeys.length > 0) {
+                return (table.getColumn("__combined_search__")?.getFilterValue() as string) ?? ""
+              }
+              return (table.getColumn(searchKey!)?.getFilterValue() as string) ?? ""
+            })()}
+            onChange={(event) => {
+              const value = event.target.value
+              if (searchKeys && searchKeys.length > 0) {
+                table.getColumn("__combined_search__")?.setFilterValue(value)
+              } else if (searchKey) {
+                table.getColumn(searchKey)?.setFilterValue(value)
+              }
+            }}
             className="max-w-sm"
           />
         )}
