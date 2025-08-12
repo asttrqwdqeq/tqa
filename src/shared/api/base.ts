@@ -10,6 +10,15 @@ export const api = axios.create({
   },
 });
 
+// Log outgoing requests (development only)
+api.interceptors.request.use((config) => {
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`➡️ API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,
+      { params: config.params, data: config.data });
+  }
+  return config;
+});
+
 // Interceptor для обработки ошибок
 api.interceptors.response.use(
   (response) => response,

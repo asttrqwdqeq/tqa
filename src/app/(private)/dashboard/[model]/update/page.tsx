@@ -64,9 +64,9 @@ const modelConfigs: Record<string, ModelConfig> = {
       { key: "username", label: "Username", type: "text", required: true },
       { key: "tgId", label: "Telegram ID", type: "text", required: true },
       { key: "balance", label: "Balance", type: "number", required: true },
-      { key: "vipLevelId", label: "VIP level", type: "number", required: true },
+      { key: "vipLevelId", label: "VIP level", type: "number", required: false },
       { key: "inviterId", label: "Inviter ID", type: "text", required: false },
-      { key: "appWalletId", label: "App Wallet ID", type: "text", required: true },
+      { key: "appWalletId", label: "App Wallet ID", type: "text", required: false },
     ]
   },
   appWallet: {
@@ -337,18 +337,27 @@ export default function UpdateModelPage({ params }: PageProps) {
     Object.keys(data).forEach(key => {
       if (data[key] === 'on') {
         data[key] = true
-      } else if (data[key] === '') {
-        data[key] = false
       }
     })
     
     // Специфичные преобразования для разных моделей
     switch (model) {
-      case 'users':
-        return {
-          ...data,
-          inviterId: (data.inviterId === '' || data.inviterId === false) ? null : data.inviterId,
+      case 'users': {
+        const out: any = { ...data }
+        // Отправляем строку 'null' чтобы пройти @IsString() в DTO и обработать на бэке как disconnect
+        if (out.inviterId === '' || out.inviterId === false) {
+          out.inviterId = 'null'
         }
+        // Числовые поля: не отправляем пустые значения
+        if (out.balance === '' || Number.isNaN(out.balance)) delete out.balance
+        if (out.vipLevelId === '' || Number.isNaN(out.vipLevelId)) delete out.vipLevelId
+
+        // Строковые поля: не отправляем пустые строки чтобы не затирать и не падать на валидации
+        if (out.username === '') delete out.username
+        if (out.tgId === '') delete out.tgId
+        if (out.appWalletId === '' || out.appWalletId === false) delete out.appWalletId
+        return out
+      }
       case 'appWallet':
         return {
           ...data,
