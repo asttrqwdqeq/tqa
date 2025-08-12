@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { usersApi } from '@/shared/api/users';
-import { UpdateUserData } from '@/shared/api/types';
+import { UpdateUserData, AdminReferralsList } from '@/shared/api/types';
 import { toast } from 'sonner'; // Если используете sonner для уведомлений
 import { CreateUserData } from '@/shared/hooks';
 
@@ -11,6 +11,7 @@ export const userKeys = {
   list: (params?: any) => [...userKeys.lists(), params] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
+  referrals: (id: string, params?: any) => [...userKeys.detail(id), 'referrals', params] as const,
 };
 
 // Хук для получения списка пользователей
@@ -94,4 +95,20 @@ export function usePrefetchUser() {
       staleTime: 1000 * 60 * 5, // 5 минут
     });
   };
+}
+
+// Хук для получения рефералов пользователя для админки
+export function useUserReferrals(
+  id: string,
+  params?: { limit?: number; offset?: number; wave?: string; status?: string; search?: string },
+  enabled = true,
+) {
+  return useQuery({
+    queryKey: userKeys.referrals(id, params),
+    queryFn: async (): Promise<AdminReferralsList> => {
+      const res = await usersApi.getUserReferrals(id, params);
+      return res.data;
+    },
+    enabled: !!id && enabled,
+  });
 }

@@ -4,7 +4,7 @@ import { use } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, Save, X, Trash2 } from "lucide-react"
 import { useForm, Controller } from "react-hook-form"
-import { useEffect } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import { Button } from "@/shared/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/components/ui/card"
@@ -22,6 +22,8 @@ import {
   useDeleteNotification,
   useDeleteUser,
 } from "@/shared/hooks"
+import { useUserReferrals } from "@/entities/user/hooks/use-users"
+import { usersApi } from "@/shared/api/users"
 import { useQueryClient } from "@tanstack/react-query"
 
 // Типы для полей формы
@@ -342,6 +344,11 @@ export default function UpdateModelPage({ params }: PageProps) {
     
     // Специфичные преобразования для разных моделей
     switch (model) {
+      case 'users':
+        return {
+          ...data,
+          inviterId: (data.inviterId === '' || data.inviterId === false) ? null : data.inviterId,
+        }
       case 'appWallet':
         return {
           ...data,
@@ -601,6 +608,168 @@ export default function UpdateModelPage({ params }: PageProps) {
           </div>
         </CardContent>
       </Card>
+
+      {model === 'users' && id && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Referrals</CardTitle>
+            <CardDescription>User's latest referrals with search</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <UserReferralsTable userId={id} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
+}
+
+function UserReferralsTable({ userId }: { userId: string }) {
+  const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [all, setAll] = useState<any[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch all pages (client-side search only)
+  useEffect(() => {
+    let canceled = false;
+    async function loadAll() {
+      setLoading(true);
+      setError(null);
+      try {
+        const limit = 100; // backend hard cap
+        let offset = 0;
+        let total = Infinity;
+        const combined: any[] = [];
+
+        while (!canceled && combined.length < total) {
+          const res = await usersApi.getUserReferrals(userId, { limit, offset });
+          if (!res.success) break;
+          const { referrals, total: t, count } = res.data;
+          total = t;
+          combined.push(...referrals);
+          if (count < limit) break;
+          offset += limit;
+        }
+
+        if (!canceled) {
+          setAll(combined);
+        }
+      } catch (e: any) {
+        if (!canceled) setError(e?.message || 'Failed to load referrals');
+      } finally {
+        if (!canceled) setLoading(false);
+      }
+    }
+    loadAll();
+    return () => {
+      canceled = true;
+    };
+  }, [userId]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return all;
+    return all.filter((r: any) =>
+      r.id.toLowerCase().includes(q) ||
+      r.tgId.toLowerCase().includes(q) ||
+      (r.username ? r.username.toLowerCase().includes(q) : false)
+    );
+  }, [all, search]);
+
+  if (loading) {
+    return (
+      <div className="space-y-3">
+        <div className="max-w-sm">
+          <Input
+            placeholder="Search by id, tgId, username"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            disabled
+          />
+        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary" /> Loading referrals…
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-3">
+        <div className="max-w-sm">
+          <Input
+            placeholder="Search by id, tgId, username"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="text-sm text-red-600">{error}</div>
+      </div>
+    );
+  }
+
+  if (!all || all.length === 0) {
+    return (
+      <div className="space-y-3">
+        <div className="max-w-sm">
+          <Input
+            placeholder="Search by id, tgId, username"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+        <div className="text-sm text-muted-foreground">No referrals</div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3 overflow-x-auto">
+      <div className="max-w-sm">
+        <Input
+          placeholder="Search by id, tgId, username"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="text-left text-muted-foreground">
+            <th className="py-2 pr-3">ID</th>
+            <th className="py-2 pr-3">TG</th>
+            <th className="py-2 pr-3">Username</th>
+            <th className="py-2 pr-3">Balance</th>
+            <th className="py-2 pr-3">VIP</th>
+            <th className="py-2 pr-3">Operations</th>
+            <th className="py-2 pr-3">Wave</th>
+            <th className="py-2 pr-3">Status</th>
+            <th className="py-2 pr-3">Registered</th>
+            <th className="py-2 pr-3">Last activity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filtered.map((r: any) => (
+            <tr
+              key={r.id}
+              className="border-t hover:bg-muted/40 cursor-pointer"
+              onClick={() => window.location.assign(`/dashboard/users/update?id=${r.id}`)}
+            >
+              <td className="py-2 pr-3 font-mono text-xs">{r.id}</td>
+              <td className="py-2 pr-3">{r.tgId}</td>
+              <td className="py-2 pr-3">{r.username || '-'}</td>
+              <td className="py-2 pr-3">{r.balance}</td>
+              <td className="py-2 pr-3">{r.vipLevel}</td>
+              <td className="py-2 pr-3">{r.operationsCount}</td>
+              <td className="py-2 pr-3">{r.wave}</td>
+              <td className="py-2 pr-3 capitalize">{r.status}</td>
+              <td className="py-2 pr-3">{new Date(r.createdAt).toLocaleString('en-US')}</td>
+              <td className="py-2 pr-3">{r.lastActivityAt ? new Date(r.lastActivityAt).toLocaleString('en-US') : '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
 }

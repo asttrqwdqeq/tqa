@@ -6,7 +6,8 @@ import {
   DeleteUserData,
   UserListResponse,
   UserResponse,
-  UserStatsResponse 
+  UserStatsResponse,
+  AdminReferralsList,
 } from './types';
 
 export const usersApi = {
@@ -79,8 +80,14 @@ export const usersApi = {
   },
 
   // Получить рефералов пользователя
-  getUserReferrals: async (id: string, params?: { limit?: number; offset?: number }) => {
-    const response = await api.get(`/admin/users/${id}/referrals`, { params });
+  getUserReferrals: async (
+    id: string,
+    params?: { limit?: number; offset?: number; wave?: string; status?: string; search?: string }
+  ): Promise<{ success: boolean; data: AdminReferralsList; message: string }> => {
+    const response = await api.get<{ success: boolean; data: AdminReferralsList; message: string }>(
+      `/admin/users/${id}/referrals`,
+      { params }
+    );
     return response.data;
   },
 };

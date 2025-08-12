@@ -104,6 +104,7 @@ export interface UpdateUserData {
   balance?: number;
   vipLevelId?: number;
   isBlocked?: boolean;
+  inviterId?: string | null;
 }
 
 export interface DeleteUserData {
@@ -153,6 +154,33 @@ export interface UserStatsResponse {
   success: boolean;
   data: UserStatsData;
   message: string;
+}
+
+// ============================================================================
+// ТИПЫ ДЛЯ РЕФЕРРАЛОВ ПОЛЬЗОВАТЕЛЯ (админ)
+// ============================================================================
+
+export type ReferralStatus = 'active' | 'inactive' | 'notActivated';
+
+export interface AdminReferral {
+  id: string;
+  tgId: string;
+  username: string | null;
+  balance: number;
+  vipLevel: number;
+  operationsCount: number;
+  lastActivityAt: string | null;
+  createdAt: string;
+  wave: 1 | 2 | 3;
+  status: ReferralStatus;
+}
+
+export interface AdminReferralsList {
+  referrals: AdminReferral[];
+  total: number;
+  count: number;
+  limit: number;
+  offset: number;
 }
 
 // ============================================================================
