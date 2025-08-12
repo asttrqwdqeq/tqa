@@ -90,23 +90,23 @@ export default function WithdrawsPage() {
   const handleApprove = async (id: string, txHash?: string) => {
     try {
       await approveWithdraw.mutateAsync({ id, txHash })
-      toast.success("Вывод подтвержден")
+      toast.success("Withdraw approved")
     } catch {
-      toast.error("Ошибка при подтверждении вывода")
+      toast.error("Error approving withdraw")
     }
   }
 
   const handleReject = async (id: string, reason?: string) => {
     try {
       await rejectWithdraw.mutateAsync({ id, reason })
-      toast.success("Вывод отклонен, средства возвращены пользователю")
+      toast.success("Withdraw rejected, funds returned to user")
     } catch {
-      toast.error("Ошибка при отклонении вывода")
+      toast.error("Error rejecting withdraw")
     }
   }
 
   const handleExport = () => {
-    toast.success("Экспорт начат")
+    toast.success("Export started")
   }
 
   // Утилиты
@@ -134,7 +134,7 @@ export default function WithdrawsPage() {
     return (
       <Badge variant={config.variant} className={config.className}>
         <Icon className="w-3 h-3 mr-1" />
-        {status === 'PENDING' ? 'Ожидает' : status === 'COMPLETED' ? 'Завершен' : 'Отклонен'}
+        {status === 'PENDING' ? 'Pending' : status === 'COMPLETED' ? 'Completed' : 'Rejected'}
       </Badge>
     )
   }
@@ -144,11 +144,11 @@ export default function WithdrawsPage() {
       <div className="space-y-6">
         <div className="text-center py-12">
           <XCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Ошибка загрузки</h3>
-          <p className="text-gray-600 mb-4">Не удалось загрузить данные</p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error loading</h3>
+          <p className="text-gray-600 mb-4">Failed to load data</p>
           <Button onClick={() => refetch()}>
             <RefreshCw className="w-4 h-4 mr-2" />
-            Попробовать снова
+            Try again
           </Button>
         </div>
       </div>
@@ -160,19 +160,19 @@ export default function WithdrawsPage() {
       {/* Заголовок */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Выводы средств</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Withdraws</h1>
           <p className="text-muted-foreground">
-            Управление заявками на вывод средств пользователей
+            Manage withdraw requests from users
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={handleExport}>
             <Download className="w-4 h-4 mr-2" />
-            Экспорт
+            Export
           </Button>
           <Button variant="outline" onClick={() => refetch()}>
             <RefreshCw className="w-4 h-4 mr-2" />
-            Обновить
+            Refresh
           </Button>
         </div>
       </div>
@@ -184,10 +184,10 @@ export default function WithdrawsPage() {
             <Clock className="w-5 h-5 text-yellow-600 mr-2" />
             <div>
               <h4 className="font-semibold text-yellow-800">
-                {stats.totalPending} выводов ожидают обработки
+                {stats.totalPending} withdraws are pending
               </h4>
               <p className="text-yellow-700">
-                Требуется проверка и принятие решения по заявкам на вывод
+                Requires review and decision on withdraw requests
               </p>
             </div>
           </div>
@@ -198,20 +198,20 @@ export default function WithdrawsPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Всего выводов</CardTitle>
+              <CardTitle className="text-sm font-medium">Total withdraws</CardTitle>
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalWithdraws || 0}</div>
             <p className="text-xs text-muted-foreground">
-              За все время
+              All time
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Общая сумма</CardTitle>
+            <CardTitle className="text-sm font-medium">Total amount</CardTitle>
             <TrendingDown className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -219,14 +219,14 @@ export default function WithdrawsPage() {
               ${stats?.totalAmount?.toLocaleString() || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              Средняя: ${stats?.avgAmount?.toFixed(2) || 0}
+              Average: ${stats?.avgAmount?.toFixed(2) || 0}
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Ожидают</CardTitle>
+            <CardTitle className="text-sm font-medium">Pending</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -234,14 +234,14 @@ export default function WithdrawsPage() {
               {stats?.totalPending || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              Требуют решения
+              Requires decision
             </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Завершено</CardTitle>
+            <CardTitle className="text-sm font-medium">Completed</CardTitle>
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -249,7 +249,7 @@ export default function WithdrawsPage() {
               {stats?.totalCompleted || 0}
             </div>
             <p className="text-xs text-muted-foreground">
-              Успешных операций
+              Successful operations
             </p>
           </CardContent>
         </Card>
@@ -260,7 +260,7 @@ export default function WithdrawsPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Filter className="w-5 h-5" />
-            Фильтры
+            Filters
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -269,7 +269,7 @@ export default function WithdrawsPage() {
             <div className="relative md:col-span-2">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Поиск по ID, пользователю..."
+                placeholder="Search by ID, user..."
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
                 onKeyPress={handleSearchKeyPress}
@@ -283,26 +283,26 @@ export default function WithdrawsPage() {
               onValueChange={(value) => updateParams({ status: (value === 'ALL' ? undefined : (value as WithdrawEntity['status'])) })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Все статусы" />
+                <SelectValue placeholder="All statuses" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">Все статусы</SelectItem>
-                <SelectItem value="PENDING">Ожидает</SelectItem>
-                <SelectItem value="COMPLETED">Завершен</SelectItem>
-                <SelectItem value="FAILED">Отклонен</SelectItem>
+                <SelectItem value="ALL">All statuses</SelectItem>
+                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="COMPLETED">Completed</SelectItem>
+                <SelectItem value="FAILED">Rejected</SelectItem>
               </SelectContent>
             </Select>
 
-            {/* Валюта */}
+            {/* Currency */}
             <Select
               value={params.currency || 'ALL'}
               onValueChange={(value) => updateParams({ currency: (value === 'ALL' ? undefined : (value as WithdrawEntity['currency'])) })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Все валюты" />
+                <SelectValue placeholder="All currencies" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">Все валюты</SelectItem>
+                <SelectItem value="ALL">All currencies</SelectItem>
                 <SelectItem value="USDT">USDT</SelectItem>
                 <SelectItem value="USDC">USDC</SelectItem>
                 <SelectItem value="TON">TON</SelectItem>
@@ -310,11 +310,11 @@ export default function WithdrawsPage() {
             </Select>
           </div>
           
-          {/* Кнопка поиска для мобильных устройств */}
+          {/* Search button for mobile devices */}
           <div className="mt-4 md:hidden">
             <Button onClick={handleSearch} className="w-full">
               <Search className="w-4 h-4 mr-2" />
-              Найти
+              Search
             </Button>
           </div>
         </CardContent>
@@ -325,9 +325,9 @@ export default function WithdrawsPage() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>Список выводов</CardTitle>
+              <CardTitle>Withdraws list</CardTitle>
               <CardDescription>
-                Найдено {withdraws?.total || 0} заявок на вывод
+                Found {withdraws?.total || 0} withdraw requests
               </CardDescription>
             </div>
             <div className="flex gap-2">
@@ -336,7 +336,7 @@ export default function WithdrawsPage() {
                 size="sm"
                 onClick={() => updateParams({ sortOrder: params.sortOrder === 'asc' ? 'desc' : 'asc' })}
               >
-                {params.sortOrder === 'asc' ? '↑' : '↓'} Сортировка
+                {params.sortOrder === 'asc' ? '↑' : '↓'} Sorting
               </Button>
             </div>
           </div>
@@ -349,8 +349,8 @@ export default function WithdrawsPage() {
           ) : withdraws?.data.length === 0 ? (
             <div className="text-center py-12">
               <Search className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Выводы не найдены</h3>
-              <p className="text-gray-600">Попробуйте изменить фильтры поиска</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Withdraws not found</h3>
+              <p className="text-gray-600">Try changing the search filters</p>
             </div>
           ) : (
             <>
@@ -358,12 +358,12 @@ export default function WithdrawsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>ID</TableHead>
-                    <TableHead>Пользователь</TableHead>
-                    <TableHead>Сумма</TableHead>
-                    <TableHead>Валюта</TableHead>
-                    <TableHead>Статус</TableHead>
-                    <TableHead>Дата создания</TableHead>
-                    <TableHead className="text-right">Действия</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Currency</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created at</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -375,10 +375,10 @@ export default function WithdrawsPage() {
                       <TableCell>
                         <div>
                           <div className="font-medium">
-                            {withdraw.user?.tgId || 'Неизвестно'}
+                            {withdraw.user?.tgId || 'Unknown'}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            Баланс: ${withdraw.user?.balance?.toFixed(2) || '0.00'}
+                            Balance: ${withdraw.user?.balance?.toFixed(2) || '0.00'}
                           </div>
                         </div>
                       </TableCell>
@@ -406,7 +406,7 @@ export default function WithdrawsPage() {
                         </div>
                         {withdraw.completedAt && (
                           <div className="text-xs text-muted-foreground">
-                            Завершен: {formatDate(withdraw.completedAt)}
+                            Completed: {formatDate(withdraw.completedAt)}
                           </div>
                         )}
                       </TableCell>
@@ -420,24 +420,24 @@ export default function WithdrawsPage() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleViewWithdraw(withdraw.id)}>
                               <Eye className="mr-2 h-4 w-4" />
-                              Просмотр
+                              View
                             </DropdownMenuItem>
                             {withdraw.status === 'PENDING' && (
                               <>
                                 <DropdownMenuItem onClick={() => handleApprove(withdraw.id)}>
                                   <Check className="mr-2 h-4 w-4 text-green-600" />
-                                  Подтвердить
+                                  Approve
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleReject(withdraw.id)}>
                                   <X className="mr-2 h-4 w-4 text-red-600" />
-                                  Отклонить
+                                  Reject
                                 </DropdownMenuItem>
                               </>
                             )}
                             {withdraw.txHash && (
                               <DropdownMenuItem onClick={() => navigator.clipboard.writeText(withdraw.txHash!)}>
                                 <Calendar className="mr-2 h-4 w-4" />
-                                Копировать TX
+                                Copy TX
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
@@ -451,8 +451,8 @@ export default function WithdrawsPage() {
               {/* Пагинация */}
               <div className="flex items-center justify-between mt-6">
                 <div className="text-sm text-muted-foreground">
-                  Показано {((params.page || 1) - 1) * (params.limit || 20) + 1}-
-                  {Math.min((params.page || 1) * (params.limit || 20), withdraws?.total || 0)} из {withdraws?.total || 0}
+                  Showing {((params.page || 1) - 1) * (params.limit || 20) + 1}-
+                  {Math.min((params.page || 1) * (params.limit || 20), withdraws?.total || 0)} of {withdraws?.total || 0}
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -461,10 +461,10 @@ export default function WithdrawsPage() {
                     disabled={(params.page || 1) <= 1}
                     onClick={() => updateParams({ page: (params.page || 1) - 1 })}
                   >
-                    Предыдущая
+                    Previous
                   </Button>
                   <div className="flex items-center gap-1">
-                    <span className="text-sm">Страница</span>
+                    <span className="text-sm">Page</span>
                     <Badge variant="outline">{params.page || 1}</Badge>
                     <span className="text-sm">из {Math.ceil((withdraws?.total || 0) / (params.limit || 20))}</span>
                   </div>
@@ -474,7 +474,7 @@ export default function WithdrawsPage() {
                     disabled={(withdraws?.total || 0) <= (params.page || 1) * (params.limit || 20)}
                     onClick={() => updateParams({ page: (params.page || 1) + 1 })}
                   >
-                    Следующая
+                    Next
                   </Button>
                 </div>
               </div>

@@ -613,7 +613,7 @@ export default function UpdateModelPage({ params }: PageProps) {
         <Card>
           <CardHeader>
             <CardTitle>Referrals</CardTitle>
-            <CardDescription>User's latest referrals with search</CardDescription>
+            <CardDescription>{`User's latest referrals with search`}</CardDescription>
           </CardHeader>
           <CardContent>
             <UserReferralsTable userId={id} />

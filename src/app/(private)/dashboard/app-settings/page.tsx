@@ -6,7 +6,6 @@ import { Input } from "@/shared/components/ui/input"
 import { Label } from "@/shared/components/ui/label"
 import { Textarea } from "@/shared/components/ui"
 import { Badge } from "@/shared/components/ui/badge"
-// import { Separator } from "@/shared/components/ui/separator"
 import { toast } from "sonner"
 import { Save, RotateCcw, Download, Upload, Settings, RefreshCw } from "lucide-react"
 import { useState, useEffect } from "react"
@@ -81,12 +80,12 @@ export default function AppSettingsPage() {
 
   const handleSave = async () => {
     if (Object.keys(validationErrors).length > 0) {
-      toast.error("Исправьте ошибки перед сохранением")
+      toast.error("Fix errors before saving")
       return
     }
 
     if (Object.keys(editedSettings).length === 0) {
-      toast.info("Нет изменений для сохранения")
+      toast.info("No changes to save")
       return
     }
 
@@ -95,19 +94,19 @@ export default function AppSettingsPage() {
       
       if (settings) {
         const report = generateChangeReport(settings, result.data!)
-        toast.success(`Настройки обновлены. Изменено полей: ${result.updatedFields.length}`)
+        toast.success(`Settings updated. Changed fields: ${result.updatedFields.length}`)
       }
       
       setEditedSettings({})
     } catch (err) {
-      toast.error(`Ошибка сохранения: ${err instanceof Error ? err.message : 'Неизвестная ошибка'}`)
+      toast.error(`Error saving: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
   const handleReset = () => {
     setEditedSettings({})
     setValidationErrors({})
-    toast.info("Все несохраненные изменения отменены")
+    toast.info("All unsaved changes cancelled")
   }
 
   const handleResetToDefault = async (key: AppSettingsKey) => {
@@ -115,18 +114,18 @@ export default function AppSettingsPage() {
     
     try {
       await updateSettings({ [key]: defaultValue })
-      toast.success(`"${getSettingDisplayName(key)}" сброшена к дефолтному значению`)
+      toast.success(`"${getSettingDisplayName(key)}" reset to default value`)
     } catch (err) {
-      toast.error(`Ошибка сброса: ${err instanceof Error ? err.message : 'Неизвестная ошибка'}`)
+      toast.error(`Reset error: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
   const handleInitialize = async () => {
     try {
       await initializeSettings()
-      toast.success("Все настройки сброшены к дефолтным значениям")
+      toast.success("All settings reset to default values")
     } catch (err) {
-      toast.error(`Ошибка инициализации: ${err instanceof Error ? err.message : 'Неизвестная ошибка'}`)
+      toast.error(`Initialization error: ${err instanceof Error ? err.message : 'Unknown error'}`)
     }
   }
 
@@ -135,21 +134,21 @@ export default function AppSettingsPage() {
     
     const exportedData = exportSettings(settings)
     navigator.clipboard.writeText(exportedData)
-    toast.success("Настройки скопированы в буфер обмена")
+    toast.success("Settings copied to clipboard")
   }
 
   const handleImport = () => {
     const imported = importSettings(importData)
     
     if (!imported) {
-      toast.error("Неверный формат данных")
+      toast.error("Invalid data format")
       return
     }
     
     setEditedSettings(imported)
     setShowImportDialog(false)
     setImportData('')
-    toast.success("Настройки импортированы. Нажмите 'Сохранить' для применения")
+    toast.success("Settings imported. Click 'Save' to apply")
   }
 
   const getCurrentValue = (key: AppSettingsKey): number => {
@@ -176,15 +175,15 @@ export default function AppSettingsPage() {
     return (
       <Card className="border-destructive">
         <CardHeader>
-          <CardTitle className="text-destructive">Ошибка загрузки настроек</CardTitle>
+          <CardTitle className="text-destructive">Error loading settings</CardTitle>
           <CardDescription>
-            {error instanceof Error ? error.message : 'Неизвестная ошибка'}
+            {error instanceof Error ? error.message : 'Unknown error'}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Button onClick={() => refetch()} variant="outline">
             <RefreshCw className="w-4 h-4 mr-2" />
-            Повторить
+            Repeat
           </Button>
         </CardContent>
       </Card>
@@ -195,9 +194,9 @@ export default function AppSettingsPage() {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Настройки не найдены</CardTitle>
+          <CardTitle>Settings not found</CardTitle>
           <CardDescription>
-            Настройки приложения не инициализированы
+            Application settings are not initialized
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -206,7 +205,7 @@ export default function AppSettingsPage() {
             disabled={isInitializing}
             variant="outline"
           >
-            {isInitializing ? 'Инициализация...' : 'Создать дефолтные настройки'}
+            {isInitializing ? 'Initialization...' : 'Create default settings'}
           </Button>
         </CardContent>
       </Card>
@@ -223,11 +222,11 @@ export default function AppSettingsPage() {
             App Settings
           </h1>
           <p className="text-muted-foreground">
-            Управление настройками приложения
+            Application settings management
           </p>
           {hasChanges && (
             <Badge variant="secondary" className="mt-2">
-              Изменено полей: {changedKeys.length}
+              Changed fields: {changedKeys.length}
             </Badge>
           )}
         </div>
@@ -235,15 +234,15 @@ export default function AppSettingsPage() {
         <div className="flex items-center gap-2">
           <Button onClick={handleExport} variant="outline" size="sm">
             <Download className="w-4 h-4 mr-2" />
-            Экспорт
+            Export
           </Button>
           <Button onClick={() => setShowImportDialog(true)} variant="outline" size="sm">
             <Upload className="w-4 h-4 mr-2" />
-            Импорт
+            Import
           </Button>
           <Button onClick={handleInitialize} variant="destructive" size="sm" disabled={isInitializing}>
             <RotateCcw className="w-4 h-4 mr-2" />
-            {isInitializing ? 'Сброс...' : 'Сбросить всё'}
+            {isInitializing ? 'Reset...' : 'Reset all'}
           </Button>
         </div>
       </div>
@@ -281,8 +280,8 @@ export default function AppSettingsPage() {
                         <CardTitle className="text-lg">
                           {getSettingDisplayName(key)}
                         </CardTitle>
-                        {hasChanged && <Badge variant="default">Изменено</Badge>}
-                        {isDefault && <Badge variant="secondary">По умолчанию</Badge>}
+                        {hasChanged && <Badge variant="default">Changed</Badge>}
+                        {isDefault && <Badge variant="secondary">Default</Badge>}
                       </div>
                       <Button
                         onClick={() => handleResetToDefault(key)}
@@ -301,7 +300,7 @@ export default function AppSettingsPage() {
                     <div className="space-y-2">
                       <div className="flex items-center space-x-4">
                         <div className="flex-1 max-w-xs">
-                          <Label htmlFor={key}>Значение</Label>
+                          <Label htmlFor={key}>Value</Label>
                           <Input
                             id={key}
                             type="number"
@@ -315,14 +314,14 @@ export default function AppSettingsPage() {
                           )}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          <Label>Отображение</Label>
+                          <Label>Display</Label>
                           <div className="font-medium">{getValueDisplay(key)}</div>
                         </div>
                       </div>
 
                       {hasChanged && (
                         <div className="text-xs text-muted-foreground">
-                          Было: {formatSettingValue(key, originalValue)}
+                          Was: {formatSettingValue(key, originalValue)}
                         </div>
                       )}
                     </div>
@@ -340,18 +339,18 @@ export default function AppSettingsPage() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
-                У вас есть несохраненные изменения
+                You have unsaved changes
               </p>
               <div className="flex items-center gap-2">
                 <Button onClick={handleReset} variant="outline" disabled={isUpdating}>
-                  Отменить
+                  Cancel
                 </Button>
                 <Button 
                   onClick={handleSave} 
                   disabled={isUpdating || Object.keys(validationErrors).length > 0}
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  {isUpdating ? 'Сохранение...' : 'Сохранить'}
+                  {isUpdating ? 'Saving...' : 'Save'}
                 </Button>
               </div>
             </div>
@@ -364,14 +363,14 @@ export default function AppSettingsPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <Card className="w-full max-w-md mx-4">
             <CardHeader>
-              <CardTitle>Импорт настроек</CardTitle>
+              <CardTitle>Import settings</CardTitle>
               <CardDescription>
-                Вставьте JSON с настройками
+                Paste JSON with settings
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="import-data">JSON данные</Label>
+                <Label htmlFor="import-data">JSON data</Label>
                 <Textarea
                   id="import-data"
                   value={importData}
@@ -388,13 +387,13 @@ export default function AppSettingsPage() {
                   }} 
                   variant="outline"
                 >
-                  Отменить
+                  Cancel
                 </Button>
                 <Button 
                   onClick={handleImport} 
                   disabled={!importData.trim()}
                 >
-                  Импортировать
+                  Import
                 </Button>
               </div>
             </CardContent>
