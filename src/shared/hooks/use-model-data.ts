@@ -43,6 +43,7 @@ const modelEndpoints: Record<string, string> = {
   products: '/products',
   deposits: '/operations/admin/deposits', // Админские эндпоинты для депозитов (только DEPOSIT типы)
   appWallet: '/app-wallet', // Админские эндпоинты для app wallet
+  leaderboardParticipants: '/leaderboard/admin/participants',
   // Можно легко добавлять новые модели
 }
 
@@ -86,11 +87,13 @@ export function useModelList<T extends BaseEntity>(
     queryFn: async (): Promise<PaginatedResponse<T>> => {
       try {
         const endpoint = getModelEndpoint(model)
-        
+        const page = params?.page || 1
+        const limit = params?.limit || 10
+
         const response = await api.get<any>(endpoint, {
           params: {
-            page: params?.page || 1,
-            limit: params?.limit || 10,
+            page,
+            limit,
             ...params
           }
         })
@@ -102,9 +105,21 @@ export function useModelList<T extends BaseEntity>(
           return {
             data: response.data.data || [],
             total: response.data.pagination?.total || 0,
-            page: response.data.pagination?.page || 1,
-            limit: response.data.pagination?.limit || 10,
+            page: response.data.pagination?.page || page,
+            limit: response.data.pagination?.limit || limit,
             totalPages: response.data.pagination?.totalPages || 0
+          } as PaginatedResponse<T>
+        }
+
+        // Спец-обработка для leaderboardParticipants (AdminParticipantsListResponseDto)
+        if (model === 'leaderboardParticipants' && response.data && 'data' in response.data && 'total' in response.data) {
+          const d = response.data
+          return {
+            data: d.data || [],
+            total: d.total || 0,
+            page: d.page || page,
+            limit: d.limit || limit,
+            totalPages: d.totalPages || Math.ceil((d.total || 0) / (d.limit || limit)),
           } as PaginatedResponse<T>
         }
         

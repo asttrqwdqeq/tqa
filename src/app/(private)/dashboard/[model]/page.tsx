@@ -33,6 +33,12 @@ const modelConfigs = {
     description: "Manage app wallet",
     icon: "💰", 
     color: "blue"
+  },
+  leaderboardParticipants: {
+    title: "Leaderboard participants",
+    description: "Manage manual leaderboard entries",
+    icon: "🏆",
+    color: "yellow"
   }
 } as const
 
@@ -81,7 +87,7 @@ import {
 function useModelData(model: string, paginationParams: { page: number; limit: number }) {
   // Используем универсальный хук
   const { data: apiData, isLoading, error } = useModelList(model, paginationParams, {
-    enabled: ['notifications', 'appWallet', 'users'].includes(model), // Включаем реальный API для notifications и appWallet
+    enabled: ['notifications', 'appWallet', 'users', 'leaderboardParticipants'].includes(model),
     staleTime: 1000 * 60 * 2, // 2 минуты кэширование
   })
   
@@ -306,6 +312,21 @@ function getTableConfig(
             variant: "secondary" as const
           }
         ]
+      }
+
+    case "leaderboardParticipants":
+      return {
+        columns: [
+          commonColumns.id({ width: 220 }),
+          columnHelpers.text("username", "Username", { width: 220 }),
+          columnHelpers.custom("points", "Points", (value: number) => (
+            <span className="font-semibold">{Number(value ?? 0)}</span>
+          ), { width: 120 }),
+        ],
+        searchKeys: ["id", "username"],
+        searchPlaceholder: "Search by ID or Username...",
+        selectable: true,
+        actions: baseActions,
       }
 
     default:

@@ -73,6 +73,16 @@ const modelConfigs: Record<string, ModelConfig> = {
       },
     ]
   }
+  ,
+  leaderboardParticipants: {
+    title: "Create leaderboard participant",
+    description: "Add new participant to Leaderboard",
+    icon: "🏆",
+    fields: [
+      { key: "username", label: "Username", type: "text", required: true },
+      { key: "points", label: "Points", type: "number", required: false },
+    ]
+  }
 }
 
 interface PageProps {

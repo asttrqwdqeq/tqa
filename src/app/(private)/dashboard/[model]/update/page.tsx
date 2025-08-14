@@ -88,6 +88,16 @@ const modelConfigs: Record<string, ModelConfig> = {
       }
     ]
   }
+  ,
+  leaderboardParticipants: {
+    title: "Edit leaderboard participant",
+    description: "Edit existing leaderboard participant",
+    icon: "🏆",
+    fields: [
+      { key: "username", label: "Username", type: "text", required: true },
+      { key: "points", label: "Points", type: "number", required: false },
+    ]
+  }
 }
 
 interface PageProps {
