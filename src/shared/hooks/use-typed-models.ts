@@ -60,6 +60,7 @@ export interface DepositEntity extends BaseEntity {
   completedAt?: string
   userWallet?: string
   parentOperationId?: string
+  appWallet?: string
   // Дополнительные поля для админки
   user?: {
     id: string

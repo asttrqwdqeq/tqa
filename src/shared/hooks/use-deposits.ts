@@ -17,6 +17,7 @@ export interface DepositEntity {
   createdAt: string
   completedAt?: string
   userWallet?: string
+  appWallet?: string
   parentOperationId?: string
   user?: {
     id: string

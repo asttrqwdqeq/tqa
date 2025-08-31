@@ -30,6 +30,8 @@ export default function EditDepositPage({ params }: PageProps) {
     onSuccess: () => router.push(`/dashboard/deposits/${id}`)
   })
 
+  console.log(deposit)
+
   const { register, handleSubmit, reset, control } = useForm<Partial<DepositEntity>>()
 
   // Заполняем форму после загрузки
@@ -42,6 +44,7 @@ export default function EditDepositPage({ params }: PageProps) {
         currency: deposit.currency,
         status: deposit.status,
         userWallet: deposit.userWallet || '',
+        appWallet: deposit.appWallet || '',
       })
     }
   }, [deposit, reset])
@@ -56,6 +59,7 @@ export default function EditDepositPage({ params }: PageProps) {
       status: data.status as Status | undefined,
       txHash: data.txHash === '' ? undefined : data.txHash,
       userWallet: data.userWallet === '' ? undefined : data.userWallet,
+      appWallet: data.appWallet === '' ? undefined : data.appWallet,
     }
     updateMutation.mutate({ id, data: payload })
   }
@@ -144,8 +148,8 @@ export default function EditDepositPage({ params }: PageProps) {
               />
             </div>
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="userWallet">App wallet</Label>
-              <Input id="userWallet" placeholder="Optional" {...register('userWallet')} />
+              <Label htmlFor="appWallet">App wallet</Label>
+              <Input id="appWallet" placeholder="Optional" {...register('appWallet')} />
             </div>
 
             <div className="md:col-span-2 flex gap-2 pt-2">
