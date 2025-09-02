@@ -134,6 +134,32 @@ export interface UserResponse {
   message: string;
 }
 
+// Упрощенный тип пользователя для списков
+export interface SimpleUser {
+  id: string;
+  username?: string;
+  tgId: string;
+  createdAt: string;
+}
+
+export interface SimpleUserListResponse {
+  success: boolean;
+  data: SimpleUser[];
+  pagination: UserPagination;
+  message: string;
+}
+
+// Типы для модераторских операций
+export interface UpdateUserUsernameData {
+  username: string;
+  reason?: string;
+}
+
+export interface UpdateUserTgIdData {
+  tgId: string;
+  reason?: string;
+}
+
 export interface UserStatsData {
   period: string;
   totalUsers: number;
@@ -252,4 +278,39 @@ export interface NotificationStats {
   active: number;
   inactive: number;
   byType: Record<NotificationType, number>;
+}
+
+// ============================================================================
+// ТИПЫ ДЛЯ АДМИНОВ
+// ============================================================================
+
+export interface Admin {
+  id: string;
+  username: string;
+  isSuperAdmin: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateAdminData {
+  username: string;
+  password: string;
+  isSuperAdmin?: boolean;
+}
+
+export interface UpdateAdminData {
+  password?: string;
+  isSuperAdmin?: boolean;
+}
+
+export interface AdminListResponse {
+  success: boolean;
+  data: Admin[];
+  message?: string;
+}
+
+export interface AdminResponse {
+  success: boolean;
+  data: Admin | null;
+  message: string;
 }

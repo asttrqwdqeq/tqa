@@ -33,6 +33,16 @@ interface ModelConfig {
 
 // Конфигурации форм для разных моделей
 const modelConfigs: Record<string, ModelConfig> = {
+  admins: {
+    title: "Create admin",
+    description: "Create new admin account",
+    icon: "🛡️",
+    fields: [
+      { key: "username", label: "Username", type: "text", required: true },
+      { key: "password", label: "Password", type: "text", required: true },
+      { key: "isSuperAdmin", label: "Super admin privileges", type: "checkbox", defaultValue: false }
+    ]
+  },
   notifications: {
     title: "Create notification",
     description: "Create new system notification",
@@ -98,7 +108,7 @@ export default function CreateModelPage({ params }: PageProps) {
   
   const modelConfig = modelConfigs[model]
   const createMutation = useCreateModel(model, {
-    onSuccess: () => router.push(`/dashboard/${model}`),
+    onSuccess: () => router.push(`/superadmin/dashboard/${model}`),
   })
   
   const { register, handleSubmit, formState: { errors, isSubmitting }, control } = useForm()
@@ -114,7 +124,7 @@ export default function CreateModelPage({ params }: PageProps) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => router.push("/dashboard")} variant="outline">
+            <Button onClick={() => router.push("/superadmin/dashboard")} variant="outline">
               Return to main page
             </Button>
           </CardContent>
@@ -144,10 +154,11 @@ export default function CreateModelPage({ params }: PageProps) {
     
     // Специфичные преобразования для разных моделей
     switch (model) {
-      case 'orders':
+      case 'admins':
         return {
-          ...data,
-          total: parseFloat(data.total) || 0
+          username: data.username,
+          password: data.password,
+          isSuperAdmin: Boolean(data.isSuperAdmin)
         }
       case 'users':
         return {
@@ -173,7 +184,7 @@ export default function CreateModelPage({ params }: PageProps) {
             <Button 
               variant="outline" 
               size="sm"
-              onClick={() => router.push(`/dashboard/${model}`)}
+              onClick={() => router.push(`/superadmin/dashboard/${model}`)}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
@@ -214,12 +225,20 @@ export default function CreateModelPage({ params }: PageProps) {
                   </Label>
                   
                   {(field.type === "text" || field.type === "email") && (
-                    <Input
-                      id={field.key}
-                      type={field.type}
-                      placeholder={`Enter ${field.label.toLowerCase()}`}
-                      {...register(field.key, { required: field.required })}
-                    />
+                    <div className="space-y-1">
+                      <Input
+                        id={field.key}
+                        type={field.key === "password" ? "password" : field.type}
+                        placeholder={`Enter ${field.label.toLowerCase()}`}
+                        {...register(field.key, { 
+                          required: field.required,
+                          minLength: field.key === "password" ? { value: 5, message: "Password must be at least 5 characters" } : undefined
+                        })}
+                      />
+                      {errors[field.key] && (
+                        <p className="text-sm text-red-600">{errors[field.key]?.message as string}</p>
+                      )}
+                    </div>
                   )}
                   
                   {field.type === "number" && (
@@ -302,7 +321,7 @@ export default function CreateModelPage({ params }: PageProps) {
               <Button 
                 type="button" 
                 variant="outline"
-                onClick={() => router.push(`/dashboard/${model}`)}
+                onClick={() => router.push(`/superadmin/dashboard/${model}`)}
               >
                 <X className="h-4 w-4 mr-2" />
                 Cancel

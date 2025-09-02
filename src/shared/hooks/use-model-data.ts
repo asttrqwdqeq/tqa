@@ -39,7 +39,7 @@ const modelEndpoints: Record<string, string> = {
   users: '/admin/users', 
   orders: '/orders',
   settings: '/settings',
-  admins: '/admins',
+  admins: '/admin/admins',
   products: '/products',
   deposits: '/operations/admin/deposits', // Админские эндпоинты для депозитов (только DEPOSIT типы)
   appWallet: '/app-wallet', // Админские эндпоинты для app wallet
@@ -194,7 +194,9 @@ export function useCreateModel<T extends BaseEntity, TCreate = Partial<T>>(
     mutationFn: async (data: TCreate): Promise<T> => {
       const endpoint = getModelEndpoint(model)
       const response = await api.post<ApiResponse<T> | T>(endpoint, data)
-      
+      if (model === 'admins' && response.data && 'admin' in response.data) {
+        return response.data.admin as T
+      }
       // Адаптируем ответ
       if (typeof response.data === 'object' && response.data !== null && 'data' in response.data) {
         return (response.data as ApiResponse<T>).data
@@ -248,6 +250,11 @@ export function useUpdateModel<T extends BaseEntity, TUpdate = Partial<T>>(
       const endpoint = getModelEndpoint(model)
       const response = await api.put<ApiResponse<T> | T>(`${endpoint}/${id}`, data)
       
+      // Специальная обработка для admins (бэкенд возвращает { message, admin })
+      if (model === 'admins' && response.data && 'admin' in response.data) {
+        return response.data.admin as T
+      }
+      
       // Адаптируем ответ
       if (typeof response.data === 'object' && response.data !== null && 'data' in response.data) {
         return (response.data as ApiResponse<T>).data
@@ -274,7 +281,17 @@ export function useUpdateModel<T extends BaseEntity, TUpdate = Partial<T>>(
       options?.onSuccess?.(data)
     },
     onError: (error: any) => {
-      const message = error.response?.data?.message || `Error updating ${getModelDisplayName(model).toLowerCase()}`
+      console.error(`❌ Update error for ${model}:`, error)
+      
+      let message = `Error updating ${getModelDisplayName(model).toLowerCase()}`
+      
+      if (error.response?.data?.message) {
+        message = error.response.data.message
+      } else if (error.response?.data?.error) {
+        message = error.response.data.error
+      } else if (error.message) {
+        message = error.message
+      }
       
       if (options?.showToast !== false) {
         toast.error(message)

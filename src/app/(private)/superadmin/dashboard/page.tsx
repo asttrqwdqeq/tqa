@@ -102,6 +102,38 @@ export default function DashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div 
+                  onClick={() => router.push('/superadmin/dashboard/admins')}
+                  className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
+                >
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-2xl">🛡️</span>
+                    <h3 className="font-semibold group-hover:text-primary">Admins</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Manage admin accounts
+                  </p>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        router.push('/superadmin/dashboard/admins')
+                      }}
+                      className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
+                    >
+                      View
+                    </button>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        router.push('/superadmin/dashboard/admins/create')
+                      }}
+                      className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded"
+                    >
+                      Create
+                    </button>
+                  </div>
+                </div>
             {/* Уведомления */}
             <div 
               onClick={() => router.push('/dashboard/notifications')}
@@ -138,7 +170,7 @@ export default function DashboardPage() {
 
             {/* Пользователи */}
             <div 
-              onClick={() => router.push('/dashboard/users')}
+              onClick={() => router.push('/superadmin/dashboard/users')}
               className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -152,7 +184,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    router.push('/dashboard/users')
+                    router.push('/superadmin/dashboard/users')
                   }}
                   className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
                 >
@@ -161,11 +193,11 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    router.push('/dashboard/users/create')
+                    router.push('/superadmin/dashboard/users?status=active')
                   }}
                   className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded"
                 >
-                  Create
+                  Active
                 </button>
               </div>
             </div>

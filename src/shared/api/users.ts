@@ -8,6 +8,9 @@ import {
   UserResponse,
   UserStatsResponse,
   AdminReferralsList,
+  SimpleUserListResponse,
+  UpdateUserUsernameData,
+  UpdateUserTgIdData,
 } from './types';
 
 export const usersApi = {
@@ -88,6 +91,28 @@ export const usersApi = {
       `/admin/users/${id}/referrals`,
       { params }
     );
+    return response.data;
+  },
+
+  // ===== НОВЫЕ МОДЕРАТОРСКИЕ ЭНДПОИНТЫ =====
+
+  // Получить упрощенный список пользователей
+  getSimpleUsers: async (params?: UserListQuery): Promise<SimpleUserListResponse> => {
+    const response = await api.get<SimpleUserListResponse>('/admin/users/simple', {
+      params,
+    });
+    return response.data;
+  },
+
+  // Изменить username пользователя
+  updateUserUsername: async (id: string, data: UpdateUserUsernameData): Promise<UserResponse> => {
+    const response = await api.put<UserResponse>(`/admin/users/${id}/username`, data);
+    return response.data;
+  },
+
+  // Изменить tgId пользователя
+  updateUserTgId: async (id: string, data: UpdateUserTgIdData): Promise<UserResponse> => {
+    const response = await api.put<UserResponse>(`/admin/users/${id}/tgid`, data);
     return response.data;
   },
 };

@@ -1,15 +1,19 @@
 "use client";
 import { LoginForm, LoginFormData } from "@/widgets/login-form/login-form";
-import { useAuth } from "@/entities/auth/provider/auth-provider";
+import { useLogin } from "@/entities/auth";
+import { useRouter } from "next/navigation";
 
 export function LoginPage() {
-  const { login, isLoggingIn, loginError } = useAuth();
+  const router = useRouter();
+  const loginMutation = useLogin();
 
   const handleLogin = async (data: LoginFormData) => {
     try {
-      await login(data);
+      const res = await loginMutation.mutateAsync(data);
+      const role = res?.user?.role;
+      const next = role === 'super_admin' ? '/superadmin/dashboard' : '/admin/dashboard';
+      await router.push(next);
     } catch (error) {
-      // Ошибка уже обработана в контексте
       console.error('Login failed:', error);
     }
   };
@@ -17,8 +21,8 @@ export function LoginPage() {
   return (
     <LoginForm
       onSubmit={handleLogin}
-      isLoading={isLoggingIn}
-      error={loginError?.message || null}
+      isLoading={loginMutation.isPending}
+      error={(loginMutation.error as any)?.message || null}
     />
   );
 }

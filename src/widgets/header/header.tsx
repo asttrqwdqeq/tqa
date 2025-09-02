@@ -1,5 +1,5 @@
 "use client";
-import { useAuth } from "@/entities/auth";
+import { useLogout, useCurrentUser } from "@/entities/auth";
 import { Button } from "@/shared/components/ui/button";
 import { LogOut, User, Settings } from "lucide-react";
 import {
@@ -10,14 +10,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export function Header() {
-  const { user, logout, isLoggingOut } = useAuth();
+  const { data: user } = useCurrentUser();
+  const logoutMutation = useLogout();
+  const router = useRouter();
 
   const handleLogout = async () => {
     try {
-      await logout();
+      await logoutMutation.mutateAsync();
+      router.push('/');
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -31,7 +34,12 @@ export function Header() {
     <div className="border-b bg-card text-card-foreground shadow-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center space-x-4">
-          <Link href="/dashboard" className="text-xl font-semibold">Админ панель</Link>
+          <button
+            onClick={() => router.push(user.role === 'super_admin' ? '/superadmin/dashboard' : '/admin/dashboard')}
+            className="text-xl font-semibold hover:underline"
+          >
+            Админ панель
+          </button>
         </div>
 
         <div className="flex items-center space-x-4">
@@ -68,11 +76,11 @@ export function Header() {
               
               <DropdownMenuItem 
                 onClick={handleLogout}
-                disabled={isLoggingOut}
+                disabled={logoutMutation.isPending}
                 className="text-red-600 focus:text-red-600"
               >
                 <LogOut className="mr-2 h-4 w-4" />
-                <span>{isLoggingOut ? 'Выход...' : 'Выйти'}</span>
+                <span>{logoutMutation.isPending ? 'Выход...' : 'Выйти'}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
