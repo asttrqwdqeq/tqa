@@ -136,7 +136,7 @@ export default function DashboardPage() {
                 </div>
             {/* Уведомления */}
             <div 
-              onClick={() => router.push('/dashboard/notifications')}
+              onClick={() => router.push('/superadmin/dashboard/notifications')}
               className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -150,7 +150,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    router.push('/dashboard/notifications')
+                    router.push('/superadmin/dashboard/notifications')
                   }}
                   className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
                 >
@@ -159,7 +159,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    router.push('/dashboard/notifications/create')
+                    router.push('/superadmin/dashboard/notifications/create')
                   }}
                   className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded"
                 >
@@ -204,7 +204,7 @@ export default function DashboardPage() {
 
             {/* App Wallet */}
             <div 
-              onClick={() => router.push('/dashboard/appWallet')}
+              onClick={() => router.push('/superadmin/dashboard/appWallet')}
               className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -218,7 +218,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    router.push('/dashboard/appWallet')
+                    router.push('/superadmin/dashboard/appWallet')
                   }}
                   className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
                 >
@@ -227,7 +227,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    router.push('/dashboard/appWallet/create')
+                    router.push('/superadmin/dashboard/appWallet/create')
                   }}
                   className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded"
                 >
@@ -238,7 +238,7 @@ export default function DashboardPage() {
 
             {/* Leaderboard Participants */}
             <div 
-              onClick={() => router.push('/dashboard/leaderboardParticipants')}
+              onClick={() => router.push('/superadmin/dashboard/leaderboardParticipants')}
               className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -252,7 +252,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    router.push('/dashboard/leaderboardParticipants')
+                    router.push('/superadmin/dashboard/leaderboardParticipants')
                   }}
                   className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
                 >
@@ -261,7 +261,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    router.push('/dashboard/leaderboardParticipants/create')
+                    router.push('/superadmin/dashboard/leaderboardParticipants/create')
                   }}
                   className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded"
                 >
@@ -272,7 +272,7 @@ export default function DashboardPage() {
 
             {/* Депозиты и операции */}
             <div 
-              onClick={() => router.push('/dashboard/deposits')}
+              onClick={() => router.push('/superadmin/dashboard/deposits')}
               className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -286,7 +286,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    router.push('/dashboard/deposits')
+                    router.push('/superadmin/dashboard/deposits')
                   }}
                   className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
                 >
@@ -295,7 +295,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    router.push('/dashboard/deposits?status=PENDING')
+                    router.push('/superadmin/dashboard/deposits?status=PENDING')
                   }}
                   className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded"
                 >
@@ -306,7 +306,7 @@ export default function DashboardPage() {
 
             {/* Выводы */}
             <div 
-              onClick={() => window.location.href = '/dashboard/withdraws'}
+              onClick={() => window.location.href = '/superadmin/dashboard/withdraws'}
               className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -320,7 +320,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = '/dashboard/withdraws'
+                    window.location.href = '/superadmin/dashboard/withdraws'
                   }}
                   className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
                 >
@@ -329,7 +329,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = '/dashboard/withdraws?status=PENDING'
+                    window.location.href = '/superadmin/dashboard/withdraws?status=PENDING'
                   }}
                   className="text-xs px-2 py-1 bg-yellow-100 text-yellow-700 rounded"
                 >
@@ -340,7 +340,7 @@ export default function DashboardPage() {
 
             {/* Настройки приложения */}
             <div 
-              onClick={() => window.location.href = '/dashboard/app-settings'}
+              onClick={() => window.location.href = '/superadmin/dashboard/app-settings'}
               className="group p-4 border rounded-lg hover:bg-muted/50 cursor-pointer transition-colors"
             >
               <div className="flex items-center gap-3 mb-2">
@@ -354,7 +354,7 @@ export default function DashboardPage() {
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    window.location.href = '/dashboard/app-settings'
+                    window.location.href = '/superadmin/dashboard/app-settings'
                   }}
                   className="text-xs px-2 py-1 bg-primary/10 text-primary rounded"
                 >
